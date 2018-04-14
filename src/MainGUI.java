@@ -78,9 +78,9 @@ public class MainGUI
 
         protected AppPanel wwjPanel;
         protected JPanel controlPanel;
-        protected LayerPanel layerPanel;
+        protected LayerPanelCustom layerPanel;
         protected StatisticsPanel statsPanel;
-        protected PointFileSelectionPanel pfsP;
+        protected BinningPanel pfsP;
 
         public AppFrame()
         {
@@ -109,10 +109,10 @@ public class MainGUI
             if (includeLayerPanel)
             {
                 this.controlPanel = new JPanel(new BorderLayout(10, 10));
-                this.layerPanel = new LayerPanel(this.getWwd());
+                this.layerPanel = new LayerPanelCustom(this.getWwd());
                 this.controlPanel.add(this.layerPanel, BorderLayout.CENTER);
                 this.controlPanel.add(new FlatWorldPanel(this.getWwd()), BorderLayout.SOUTH);
-                this.pfsP = new PointFileSelectionPanel();
+                this.pfsP = new BinningPanel();
                 this.controlPanel.add(this.pfsP, BorderLayout.NORTH);
                 this.getContentPane().add(this.controlPanel, BorderLayout.WEST);
 
@@ -194,7 +194,7 @@ public class MainGUI
          * @deprecated Use getControlPanel instead.
          * @return This application's layer panel.
          */
-        public LayerPanel getLayerPanel()
+        public LayerPanelCustom getLayerPanel()
         {
             return this.layerPanel;
         }
