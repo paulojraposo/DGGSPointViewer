@@ -1,13 +1,19 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class BinningPanel extends JPanel{
 
     JFileChooser fc;
+    JPanel logoPanel;
+    JLabel logoLabel;
     JPanel fileChoosingPanel;
     JLabel chosenFileLabel;
     JButton chooseFileButton;
@@ -27,6 +33,22 @@ public class BinningPanel extends JPanel{
         this.setBorder(
             new CompoundBorder(BorderFactory.createEmptyBorder(9, 9, 9, 9), new TitledBorder("MAUP Viewer")));
 
+        // UT Logo
+        // fixme :)
+//        logoPanel = new JPanel();
+//        logoLabel = new JLabel("hi");
+//        try {
+//            BufferedImage myPicture = ImageIO.read(new File("resources/UTGeog.jpg"));
+//            ImageIcon utIcon = new ImageIcon(myPicture);
+//            logoLabel.setIcon(utIcon);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//        logoPanel.add(logoLabel);
+//        this.add(logoPanel);
+
+        // File choosing
+        fileChoosingPanel = new JPanel(new FlowLayout());
         chooseFileButton = new JButton("Choose File...");
         chooseFileButton.addActionListener(new ActionListener() {
             @Override
@@ -37,9 +59,6 @@ public class BinningPanel extends JPanel{
             }
         });
         chosenFileLabel = new JLabel("<Filename>");
-
-        // File choosing
-        fileChoosingPanel = new JPanel(new FlowLayout());
         fileChoosingPanel.add(chooseFileButton);
         fileChoosingPanel.add(chosenFileLabel);
         this.add(fileChoosingPanel);
@@ -62,6 +81,8 @@ public class BinningPanel extends JPanel{
 
         // Visual separation between file choosing and mapping options
         this.add(new JSeparator(JSeparator.HORIZONTAL));
+
+        // TODO: add mapping options panel here.
 
     }
 

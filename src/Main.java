@@ -1,3 +1,8 @@
+import gov.nasa.worldwind.Configuration;
+import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.globes.EarthFlat;
+import gov.nasa.worldwind.layers.LayerList;
+
 import javax.swing.*;
 
 public class Main {
@@ -24,7 +29,7 @@ public class Main {
         }
 
         MainGUI mGUI = new MainGUI();
-        mGUI.start("Point Statistics on Discrete Global Grid", MainGUI.AppFrame.class);
+        mGUI.start("Point Stats on a Discrete Global Grid", MainGUI.AppFrame.class);
 
     }
 

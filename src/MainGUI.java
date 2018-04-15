@@ -12,7 +12,6 @@ import gov.nasa.worldwind.layers.placename.PlaceNameLayer;
 import gov.nasa.worldwind.util.*;
 import gov.nasa.worldwindx.examples.ClickAndGoSelectListener;
 import gov.nasa.worldwindx.examples.FlatWorldPanel;
-import gov.nasa.worldwindx.examples.LayerPanel;
 import gov.nasa.worldwindx.examples.util.*;
 
 import javax.swing.*;
@@ -80,7 +79,7 @@ public class MainGUI
         protected JPanel controlPanel;
         protected LayerPanelCustom layerPanel;
         protected StatisticsPanel statsPanel;
-        protected BinningPanel pfsP;
+        protected BinningPanel binningPanel;
 
         public AppFrame()
         {
@@ -112,8 +111,8 @@ public class MainGUI
                 this.layerPanel = new LayerPanelCustom(this.getWwd());
                 this.controlPanel.add(this.layerPanel, BorderLayout.CENTER);
                 this.controlPanel.add(new FlatWorldPanel(this.getWwd()), BorderLayout.SOUTH);
-                this.pfsP = new BinningPanel();
-                this.controlPanel.add(this.pfsP, BorderLayout.NORTH);
+                this.binningPanel = new BinningPanel();
+                this.controlPanel.add(this.binningPanel, BorderLayout.NORTH);
                 this.getContentPane().add(this.controlPanel, BorderLayout.WEST);
 
             }
