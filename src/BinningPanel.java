@@ -34,18 +34,13 @@ public class BinningPanel extends JPanel{
             new CompoundBorder(BorderFactory.createEmptyBorder(9, 9, 9, 9), new TitledBorder("MAUP Viewer")));
 
         // UT Logo
-        // fixme :)
-//        logoPanel = new JPanel();
-//        logoLabel = new JLabel("hi");
-//        try {
-//            BufferedImage myPicture = ImageIO.read(new File("resources/UTGeog.jpg"));
-//            ImageIcon utIcon = new ImageIcon(myPicture);
-//            logoLabel.setIcon(utIcon);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//        logoPanel.add(logoLabel);
-//        this.add(logoPanel);
+//         fixme :)
+        logoPanel = new JPanel();
+        logoLabel = new JLabel();
+        logoLabel.setIcon(new ImageIcon("out/production/DGGSPointViewer/resources/UTGeog.png"));
+        logoLabel.setVisible(true);
+        logoPanel.add(logoLabel);
+        this.add(logoPanel);
 
         // File choosing
         fileChoosingPanel = new JPanel(new FlowLayout());
