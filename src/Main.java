@@ -1,7 +1,3 @@
-import gov.nasa.worldwind.Configuration;
-import gov.nasa.worldwind.avlist.AVKey;
-import gov.nasa.worldwind.globes.EarthFlat;
-import gov.nasa.worldwind.layers.LayerList;
 
 import javax.swing.*;
 
