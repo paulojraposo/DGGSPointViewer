@@ -3,6 +3,9 @@ import javax.swing.*;
 
 public class Main {
 
+    private static String userCSVFilePath;
+    private static CSVReader csvReader;
+
     public static void main(String[] args) {
 
         // Set Nimbus Look and Feel.
@@ -27,6 +30,16 @@ public class Main {
         MainGUI mGUI = new MainGUI();
         mGUI.start("Point Stats on a Discrete Global Grid", MainGUI.AppFrame.class);
 
+    }
+
+    public static void receiveUserFileReference(String aPath){
+        userCSVFilePath = aPath;
+        System.out.println(aPath);
+    }
+
+    private static void readCSV(String filePath){
+        csvReader = new CSVReader();
+        csvReader.readCSV();
     }
 
 }

@@ -1,9 +1,14 @@
+
+import org.jcp.xml.dsig.internal.dom.Utils;
+
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 public class MainAppPanel extends JPanel{
 
@@ -25,6 +30,11 @@ public class MainAppPanel extends JPanel{
     JPanel levelChoosingPanel;
     JLabel levelChoosingLabel;
     JComboBox<String> levelOptionCB;
+
+    JPanel attrToBinPanel;
+    JLabel attrToBinLabel;
+    JComboBox<String> attrToBinCB;
+
     JButton binningButton;
     JLabel binningProgressMessageLabel;
 
@@ -63,8 +73,11 @@ public class MainAppPanel extends JPanel{
             @Override
             public void actionPerformed(ActionEvent e) {
                 fc = new JFileChooser();
+                fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+                // TODO: make file chooser filter for CSV files.
                 int returnVal = fc.showOpenDialog(levelChoosingPanel);
                 chosenFileLabel.setText(fc.getSelectedFile().getName());
+                Main.receiveUserFileReference(fc.getSelectedFile().toPath().toString());
             }
         });
         chosenFileLabel = new JLabel("<Filename>");
@@ -76,14 +89,26 @@ public class MainAppPanel extends JPanel{
         levelChoosingPanel = new JPanel(new FlowLayout());
         levelChoosingLabel = new JLabel("Calculate Intersections up to level:");
         levelOptionCB = new JComboBox<String>(levelOptions);
+        levelOptionCB.setSelectedIndex(15);
         levelChoosingPanel.add(levelChoosingLabel);
         levelChoosingPanel.add(levelOptionCB);
         this.add(levelChoosingPanel);
 
+        // Attribute choosing
+        GridLayout attrToBinPanelLayout = new GridLayout(1,2);
+        attrToBinPanel = new JPanel(attrToBinPanelLayout);
+        attrToBinLabel = new JLabel("Attribute to bin:");
+        attrToBinCB = new JComboBox(); // The choices here need to be set once the CSV is read!
+        attrToBinCB.setEnabled(false); // Also make it enabled when option is available.
+        attrToBinPanel.add(attrToBinLabel);
+        attrToBinPanel.add(attrToBinCB);
+        this.add(attrToBinPanel);
+
         // Binning activation and progress
         binningPanel = new JPanel(new BorderLayout());
         binningButton = new JButton("Run Binning");
-        binningProgressMessageLabel = new JLabel("Ready");
+        binningButton.setEnabled(false);
+        binningProgressMessageLabel = new JLabel("Status: Ready");
         binningPanel.add(binningButton, BorderLayout.NORTH);
         binningPanel.add(binningProgressMessageLabel, BorderLayout.SOUTH);
 
@@ -94,23 +119,25 @@ public class MainAppPanel extends JPanel{
 
         mappingSuperPanel = new JPanel(new BorderLayout());
 
-        GridLayout binningPanelLayout = new GridLayout(4,2);
+        GridLayout binningPanelLayout = new GridLayout(2,2);
         mappingParameterPanel = new JPanel(binningPanelLayout);
 
-        attrLabel = new JLabel("Attribute to map:");
-        mappingParameterPanel.add(attrLabel);
-        attrCB = new JComboBox<String>(tempAttrsForTesting);
-        mappingParameterPanel.add(attrCB);
+//        attrLabel = new JLabel("Attribute to map:");
+//        mappingParameterPanel.add(attrLabel);
+//        attrCB = new JComboBox<String>(tempAttrsForTesting);
+//        attrCB.setEnabled(false); // Enable when attribute chosen
+//        mappingParameterPanel.add(attrCB);
 
         levelLabel = new JLabel("Level to draw:");
         mappingParameterPanel.add(levelLabel);
         levelCB = new JComboBox<String>(levelOptions);
+        levelCB.setSelectedIndex(11);
         mappingParameterPanel.add(levelCB);
 
-        colorLabel = new JLabel("Color ramp:");
-        mappingParameterPanel.add(colorLabel);
-        colorCB = new JComboBox<>(tempColorRampsForTesting);
-        mappingParameterPanel.add(colorCB);
+//        colorLabel = new JLabel("Color ramp:");
+//        mappingParameterPanel.add(colorLabel);
+//        colorCB = new JComboBox<>(tempColorRampsForTesting);
+//        mappingParameterPanel.add(colorCB);
 
         quantilesLabel = new JLabel("Quantiles:");
         mappingParameterPanel.add(quantilesLabel);
@@ -119,6 +146,7 @@ public class MainAppPanel extends JPanel{
 
         drawMapButton = new JButton("Draw Map");
         drawMapButton.setHorizontalTextPosition(SwingConstants.LEADING);
+        drawMapButton.setEnabled(false);
 
         // TODO: add legend.
 
