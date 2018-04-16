@@ -79,7 +79,7 @@ public class MainGUI
         protected JPanel controlPanel;
         protected LayerPanelCustom layerPanel;
         protected StatisticsPanel statsPanel;
-        protected BinningPanel binningPanel;
+        protected MainAppPanel mainAppPanel;
 
         public AppFrame()
         {
@@ -109,12 +109,11 @@ public class MainGUI
             {
                 this.controlPanel = new JPanel(new BorderLayout(10, 10));
                 this.layerPanel = new LayerPanelCustom(this.getWwd());
+                this.mainAppPanel = new MainAppPanel();
+                this.controlPanel.add(this.mainAppPanel, BorderLayout.NORTH);
                 this.controlPanel.add(this.layerPanel, BorderLayout.CENTER);
                 this.controlPanel.add(new FlatWorldPanel(this.getWwd()), BorderLayout.SOUTH);
-                this.binningPanel = new BinningPanel();
-                this.controlPanel.add(this.binningPanel, BorderLayout.NORTH);
                 this.getContentPane().add(this.controlPanel, BorderLayout.WEST);
-
             }
 
             if (includeStatsPanel || System.getProperty("gov.nasa.worldwind.showStatistics") != null)

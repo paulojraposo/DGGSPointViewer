@@ -1,17 +1,22 @@
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
-public class BinningPanel extends JPanel{
+public class MainAppPanel extends JPanel{
 
+    // Some ubiquitous elements
     JFileChooser fc;
+    String[] levelOptions = new String[]{"1", "2", "3", "4", "5", "6", "7",
+            "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"};
+    String[] quantilesOptions = new String[]{"Quartiles", "Quintiles", "Sextiles", "Septiles"};
+    String[] tempAttrsForTesting = new String[]{"one", "another", "one more"};
+    String[] tempColorRampsForTesting = new String[]{"oranges", "greens", "blues"};
+
+    // Binning area
+    JPanel binningPanel;
     JPanel logoPanel;
     JLabel logoLabel;
     JPanel fileChoosingPanel;
@@ -19,22 +24,31 @@ public class BinningPanel extends JPanel{
     JButton chooseFileButton;
     JPanel levelChoosingPanel;
     JLabel levelChoosingLabel;
-    String[] levelOptions = new String[]{"1", "2", "3", "4", "5", "6", "7",
-    "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"};
     JComboBox<String> levelOptionCB;
-    JPanel binningPanel;
     JButton binningButton;
     JLabel binningProgressMessageLabel;
 
-    public BinningPanel(){
+    // Mapping area
+    JPanel mappingSuperPanel;
+    JPanel mappingParameterPanel;
+    JLabel attrLabel;
+    JLabel levelLabel;
+    JLabel colorLabel;
+    JLabel quantilesLabel;
+    JComboBox<String> attrCB;
+    JComboBox<String> levelCB;
+    JComboBox<String> colorCB;
+    JComboBox<String> quantilesCB;
+    JButton drawMapButton;
+
+
+    public MainAppPanel(){
 
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 
-        this.setBorder(
-            new CompoundBorder(BorderFactory.createEmptyBorder(9, 9, 9, 9), new TitledBorder("MAUP Viewer")));
+        this.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(9, 9, 9, 9), new TitledBorder("MAUP Viewer")));
 
         // UT Logo
-//         fixme :)
         logoPanel = new JPanel();
         logoLabel = new JLabel();
         logoLabel.setIcon(new ImageIcon("out/production/DGGSPointViewer/resources/UTGeog.png"));
@@ -58,7 +72,7 @@ public class BinningPanel extends JPanel{
         fileChoosingPanel.add(chosenFileLabel);
         this.add(fileChoosingPanel);
 
-        // level choosing
+        // Level choosing
         levelChoosingPanel = new JPanel(new FlowLayout());
         levelChoosingLabel = new JLabel("Calculate Intersections up to level:");
         levelOptionCB = new JComboBox<String>(levelOptions);
@@ -72,12 +86,46 @@ public class BinningPanel extends JPanel{
         binningProgressMessageLabel = new JLabel("Ready");
         binningPanel.add(binningButton, BorderLayout.NORTH);
         binningPanel.add(binningProgressMessageLabel, BorderLayout.SOUTH);
+
         this.add(binningPanel);
 
         // Visual separation between file choosing and mapping options
         this.add(new JSeparator(JSeparator.HORIZONTAL));
 
-        // TODO: add mapping options panel here.
+        mappingSuperPanel = new JPanel(new BorderLayout());
+
+        GridLayout binningPanelLayout = new GridLayout(4,2);
+        mappingParameterPanel = new JPanel(binningPanelLayout);
+
+        attrLabel = new JLabel("Attribute to map:");
+        mappingParameterPanel.add(attrLabel);
+        attrCB = new JComboBox<String>(tempAttrsForTesting);
+        mappingParameterPanel.add(attrCB);
+
+        levelLabel = new JLabel("Level to draw:");
+        mappingParameterPanel.add(levelLabel);
+        levelCB = new JComboBox<String>(levelOptions);
+        mappingParameterPanel.add(levelCB);
+
+        colorLabel = new JLabel("Color ramp:");
+        mappingParameterPanel.add(colorLabel);
+        colorCB = new JComboBox<>(tempColorRampsForTesting);
+        mappingParameterPanel.add(colorCB);
+
+        quantilesLabel = new JLabel("Quantiles:");
+        mappingParameterPanel.add(quantilesLabel);
+        quantilesCB = new JComboBox<String>(quantilesOptions);
+        mappingParameterPanel.add(quantilesCB);
+
+        drawMapButton = new JButton("Draw Map");
+        drawMapButton.setHorizontalTextPosition(SwingConstants.LEADING);
+
+        // TODO: add legend.
+
+        mappingSuperPanel.add(mappingParameterPanel, BorderLayout.NORTH);
+        mappingSuperPanel.add(drawMapButton, BorderLayout.SOUTH);
+
+        this.add(mappingSuperPanel);
 
     }
 
