@@ -1,10 +1,15 @@
 
+import com.Ostermiller.util.CSVParser;
+import com.Ostermiller.util.LabeledCSVParser;
 import javax.swing.*;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
 
     private static String userCSVFilePath;
-    private static CSVReader csvReader;
+    private static LabeledCSVParser csvParser;
 
     public static void main(String[] args) {
 
@@ -35,11 +40,26 @@ public class Main {
     public static void receiveUserFileReference(String aPath){
         userCSVFilePath = aPath;
         System.out.println(aPath);
+        readCSV(aPath);
     }
 
-    private static void readCSV(String filePath){
-        csvReader = new CSVReader();
-        csvReader.readCSV();
+    public static InputStream pathToInputStream(String path) throws IOException {
+        File initialFile = new File(path);
+        InputStream targetStream = new FileInputStream(initialFile);
+        return targetStream;
     }
 
+    private static void readCSV(String filePath) {
+        InputStream iS = null;
+        try {
+            iS = pathToInputStream(filePath);
+            csvParser = new LabeledCSVParser(new CSVParser(iS));
+            while (csvParser.getLine() != null) {
+                // TODO: implement reading and storing by real fields in the CSV.
+                System.out.println(csvParser.getValueByLabel("nameascii"));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
