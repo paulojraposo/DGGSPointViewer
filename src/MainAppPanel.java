@@ -95,14 +95,14 @@ public class MainAppPanel extends JPanel{
         this.add(levelChoosingPanel);
 
         // Attribute choosing
-        GridLayout attrToBinPanelLayout = new GridLayout(1,2);
-        attrToBinPanel = new JPanel(attrToBinPanelLayout);
-        attrToBinLabel = new JLabel("Attribute to bin:");
-        attrToBinCB = new JComboBox(); // The choices here need to be set once the CSV is read!
-        attrToBinCB.setEnabled(false); // Also make it enabled when option is available.
-        attrToBinPanel.add(attrToBinLabel);
-        attrToBinPanel.add(attrToBinCB);
-        this.add(attrToBinPanel);
+//        GridLayout attrToBinPanelLayout = new GridLayout(1,2);
+//        attrToBinPanel = new JPanel(attrToBinPanelLayout);
+//        attrToBinLabel = new JLabel("Attribute to bin:");
+//        attrToBinCB = new JComboBox(); // The choices here need to be set once the CSV is read!
+//        attrToBinCB.setEnabled(false); // Also make it enabled when option is available.
+//        attrToBinPanel.add(attrToBinLabel);
+//        attrToBinPanel.add(attrToBinCB);
+//        this.add(attrToBinPanel);
 
         // Binning activation and progress
         binningPanel = new JPanel(new BorderLayout());
