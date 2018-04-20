@@ -1,5 +1,9 @@
 import com.Ostermiller.util.CSVParser;
 import com.Ostermiller.util.LabeledCSVParser;
+import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.layers.RenderableLayer;
+import gov.nasa.worldwindx.examples.GeoJSONLoader;
+
 import javax.swing.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -13,7 +17,12 @@ public class Main {
     public static void main(String[] args) {
         setLAF(); // Set Nimbus Look and Feel.
         MainGUI mGUI = new MainGUI();
-        mGUI.start("Point Stats on a Discrete Global Grid", MainGUI.AppFrame.class);
+        MainGUI.AppFrame aF = mGUI.start("Point Stats on a Discrete Global Grid", MainGUI.AppFrame.class);
+
+        // TODO: Below is just for testing. Move actual loading somewhere more sensible :)
+        GeoJSONLoader gjLoader = new GeoJSONLoader();
+        Layer lyr = gjLoader.createLayerFromSource("out/production/DGGSPointViewer/resources/qtmlevels/qtmlvl5.geojson");
+        aF.getWwd().getModel().getLayers().add(lyr);
     }
 
     public static void receiveUserFileReference(String aPath){
