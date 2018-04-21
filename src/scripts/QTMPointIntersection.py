@@ -13,8 +13,6 @@
 # and  Randall Brown (ranbrown8448 [at] gmail.com) at the Department
 # of Geography, University of Tennessee, Knoxville.
 
-# TODO: add kurtosis and skew to stats calculated, from scipy methods.
-
 
 # Imports ///////////////////////////////////////////////////////////////////////////
 
@@ -280,6 +278,8 @@ def main():
             statMedian  = 0.0
             statMean    = 0.0
             statStDev   = 0.0
+            skew        = 0.0
+            kurtosis    = 0.0
 
             if thisID in pointsContainedByPolygon.keys():
 
