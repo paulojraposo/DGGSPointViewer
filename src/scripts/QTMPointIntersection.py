@@ -213,21 +213,25 @@ def main():
     dst_layer = dst_ds.CreateLayer(fName, sRef, geom_type=ogr.wkbPolygon)
     layer_defn = dst_layer.GetLayerDefn()
     #
-    idFieldName     = 'ID'
-    countFieldName  = 'PointCount'
-    sumFieldName    = 'Sum'
-    modeFieldName   = 'Mode'
-    medianFieldName = 'Median'
-    meanFieldName   = 'Mean'
-    stDevFieldName  = 'StDev'
+    idFieldName       = 'ID'
+    countFieldName    = 'PointCount'
+    sumFieldName      = 'Sum'
+    modeFieldName     = 'Mode'
+    medianFieldName   = 'Median'
+    meanFieldName     = 'Mean'
+    stDevFieldName    = 'StDev'
+    skewFieldName     = 'Skew'
+    kurtosisFieldName = 'Kurtosis'
     #
-    idField     = ogr.FieldDefn(idFieldName, ogr.OFTString)
-    countField  = ogr.FieldDefn(countFieldName, ogr.OFTInteger)
-    sumField    = ogr.FieldDefn(sumFieldName, ogr.OFTReal)
-    modeField   = ogr.FieldDefn(modeFieldName, ogr.OFTReal)
-    medianField = ogr.FieldDefn(medianFieldName, ogr.OFTReal)
-    meanField   = ogr.FieldDefn(meanFieldName, ogr.OFTReal)
-    stDevField  = ogr.FieldDefn(stDevFieldName, ogr.OFTReal)
+    idField       = ogr.FieldDefn(idFieldName, ogr.OFTString)
+    countField    = ogr.FieldDefn(countFieldName, ogr.OFTInteger)
+    sumField      = ogr.FieldDefn(sumFieldName, ogr.OFTReal)
+    modeField     = ogr.FieldDefn(modeFieldName, ogr.OFTReal)
+    medianField   = ogr.FieldDefn(medianFieldName, ogr.OFTReal)
+    meanField     = ogr.FieldDefn(meanFieldName, ogr.OFTReal)
+    stDevField    = ogr.FieldDefn(stDevFieldName, ogr.OFTReal)
+    skewField     = ogr.FieldDefn(skewFieldName, ogr.OFTReal)
+    kurtosisField = ogr.FieldDefn(kurtosisFieldName, ogr.OFTReal)
     #
     dst_layer.CreateField(idField)
     dst_layer.CreateField(countField)
@@ -236,6 +240,8 @@ def main():
     dst_layer.CreateField(medianField)
     dst_layer.CreateField(meanField)
     dst_layer.CreateField(stDevField)
+    dst_layer.CreateField(skewField)
+    dst_layer.CreateField(kurtosisField)
 
     # Reset reading to loop through the input facets again.
     orig_Layer.ResetReading()
@@ -286,6 +292,8 @@ def main():
                 statMean    = statSum / len(statValues)
                 d           = [ (i - statMean) ** 2 for i in statValues ]
                 statStDev   = math.sqrt( sum(d) / len(d) )
+                skew        = stats.skew(statValues)
+                kurtosis    = stats.kurtosis(statValues)
 
             feature.SetField(idFieldName, str(thisID))
             feature.SetField(countFieldName, pointCount)
@@ -294,6 +302,8 @@ def main():
             feature.SetField(medianFieldName, statMedian)
             feature.SetField(meanFieldName, statMean)
             feature.SetField(stDevFieldName, statStDev)
+            feature.SetField(skewFieldName, skew)
+            feature.SetField(kurtosisFieldName, kurtosis)
 
             feature.SetGeometry(ogr.CreateGeometryFromWkt(thisGeomWKT))
 
