@@ -77,7 +77,7 @@ public class MainAppPanel extends JPanel{
                 // TODO: make file chooser filter for CSV files.
                 int returnVal = fc.showOpenDialog(levelChoosingPanel);
                 chosenFileLabel.setText(fc.getSelectedFile().getName());
-                Main.receiveUserFileReference(fc.getSelectedFile().toPath().toString());
+                Main.app.receiveUserFileReference(fc.getSelectedFile().toPath().toString());
             }
         });
         chosenFileLabel = new JLabel("<Filename>");
