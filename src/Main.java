@@ -1,12 +1,4 @@
-import com.Ostermiller.util.CSVParser;
-import com.Ostermiller.util.LabeledCSVParser;
-import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwind.layers.RenderableLayer;
-import gov.nasa.worldwindx.examples.GeoJSONLoader;
-
 import javax.swing.*;
-import java.io.*;
-import java.util.ArrayList;
 
 public class Main {
 
