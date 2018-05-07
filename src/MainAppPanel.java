@@ -141,7 +141,7 @@ public class MainAppPanel extends JPanel{
         EWTranslateSlider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                System.out.println("foo"); // TODO: write useful method here.
+                System.out.println("slider moved"); // TODO: write useful method here.
             }
         });
         maupPanel.add(EWTranslateLabel);
