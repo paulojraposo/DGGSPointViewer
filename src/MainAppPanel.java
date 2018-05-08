@@ -12,9 +12,9 @@ public class MainAppPanel extends JPanel{
 
     // Some ubiquitous elements
     public JFileChooser fc;
+    int maxQTMLevels = 12;
     String[] levelOptions = new String[]{"1", "2", "3", "4", "5", "6", "7",
             "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"};
-    String[] quantilesOptions = new String[]{"Quartiles", "Quintiles", "Sextiles", "Septiles"};
 //    String[] tempAttrsForTesting = new String[]{"one", "another", "one more"};
 //    String[] tempColorRampsForTesting = new String[]{"oranges", "greens", "blues"};
     int maximumTranslationDegrees = 9;
@@ -32,13 +32,7 @@ public class MainAppPanel extends JPanel{
     JPanel levelIntersectionCalculationPanel;
     JLabel levelChoosingLabel;
     JComboBox<String> levelIntersectionCalculationCB;
-
-//    JPanel attrToBinPanel;
-//    JLabel attrToBinLabel;
-//    JComboBox<String> attrToBinCB;
-
-    JButton binningButton;
-    JLabel binningProgressMessageLabel;
+    JButton binningButton; // Change the text of this when processing to tell the user.
 
     // MAUP panel
     JPanel maupPanel;
@@ -46,15 +40,16 @@ public class MainAppPanel extends JPanel{
     JComboBox<String> attrCB;
     JLabel levelLabel;
     JComboBox<String> levelCB;
+    JSlider levelSlider;
     JLabel EWTranslateLabel;
     JSlider EWTranslateSlider;
 
-    // Classification and Mapping area
+    // Classification and Mapping panel
     JPanel classingAndMappingPanel;
     JLabel colorLabel;
     JComboBox<String> colorCB;
     JLabel quantilesLabel;
-    JComboBox<String> quantilesCB;
+    JSlider quantilesSlider;
     JButton drawMapButton;
 
 
@@ -124,15 +119,25 @@ public class MainAppPanel extends JPanel{
 
         // MAUP panel
         maupPanel = new JPanel();
-        bMAUPTitled = BorderFactory.createTitledBorder(bGreyLine, "Modifiable Areal Units", TitledBorder.LEFT, TitledBorder.TOP);
+        bMAUPTitled = BorderFactory.createTitledBorder(bGreyLine, "Modifiable Areal Units", TitledBorder.LEFT,  TitledBorder.TOP, null, Color.black);
         maupPanel.setBorder(bMAUPTitled);
         maupPanel.setLayout(new GridLayout(2,2));
         levelLabel = new JLabel("<html><b>Scaling:</b> QTM level to draw:</html>");
         maupPanel.add(levelLabel);
-        levelCB = new JComboBox<String>(levelOptions);
-        levelCB.setSelectedIndex(11);
-        maupPanel.add(levelCB);
+        levelSlider = new JSlider(0, maxQTMLevels, 6);
+        levelSlider.setMajorTickSpacing(2);
+        levelSlider.setMinorTickSpacing(1);
+        levelSlider.setPaintTicks(true);
+        levelSlider.setPaintLabels(true);
+        levelSlider.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                System.out.println("level slider moved"); // TODO: write useful method here.
+            }
+        });
+        maupPanel.add(levelSlider);
         EWTranslateLabel = new JLabel("<html><b>Zoning:</b> Longitudinal shift<br>of mesh in degrees:</html>");
+        maupPanel.add(EWTranslateLabel);
         EWTranslateSlider = new JSlider(-1*maximumTranslationDegrees, maximumTranslationDegrees, 0);
         EWTranslateSlider.setMajorTickSpacing(3);
         EWTranslateSlider.setMinorTickSpacing(1);
@@ -141,23 +146,32 @@ public class MainAppPanel extends JPanel{
         EWTranslateSlider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                System.out.println("slider moved"); // TODO: write useful method here.
+                System.out.println("longitude slider moved"); // TODO: write useful method here.
             }
         });
-        maupPanel.add(EWTranslateLabel);
         maupPanel.add(EWTranslateSlider);
         this.add(maupPanel);
 
         // Classing and Mapping Panel
         classingAndMappingPanel = new JPanel();
-        bClassificationTitled = BorderFactory.createTitledBorder(bGreyLine, "Choropleth Classification", TitledBorder.LEFT, TitledBorder.TOP);
+        bClassificationTitled = BorderFactory.createTitledBorder(bGreyLine, "Choropleth Classification", TitledBorder.LEFT, TitledBorder.TOP, null, Color.black);
         classingAndMappingPanel.setBorder(bClassificationTitled);
         GridLayout binningPanelLayout = new GridLayout(1,2); // TODO: revise x by y as needed for new elements.
         classingAndMappingPanel.setLayout(binningPanelLayout);
         quantilesLabel = new JLabel("Quantiles:");
         classingAndMappingPanel.add(quantilesLabel);
-        quantilesCB = new JComboBox<String>(quantilesOptions);
-        classingAndMappingPanel.add(quantilesCB);
+        quantilesSlider = new JSlider(2, 8, 5);
+        quantilesSlider.setMajorTickSpacing(1);
+        quantilesSlider.setMinorTickSpacing(1);
+        quantilesSlider.setPaintTicks(true);
+        quantilesSlider.setPaintLabels(true);
+        quantilesSlider.addChangeListener(new ChangeListener() {
+            @Override
+            public void stateChanged(ChangeEvent e) {
+                System.out.println("longitude slider moved"); // TODO: write useful method here.
+            }
+        });
+        classingAndMappingPanel.add(quantilesSlider);
         this.add(classingAndMappingPanel);
 
 //        colorLabel = new JLabel("Color ramp:");
