@@ -70,4 +70,17 @@ public class App {
             e.printStackTrace();
         }
     }
+
+    public void performBinning(){
+        // Here, we need to run a Python script to perform the geodetic
+        // binning, using a system call. Ideally that should be in a
+        // separate thread, to keep the app UI from being unresponsive.
+        // Needs to use the existing QTM level files, normal and lon-shifted
+        // versions, at all the levels of defined by the user with the
+        // combobox in the GUI. Those should be saved to a temporary
+        // location on the user's disk, to be selectable as layers to
+        // load onto the globe.
+
+        System.out.println("Would be binning here.");
+    }
 }

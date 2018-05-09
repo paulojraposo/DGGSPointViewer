@@ -1,3 +1,4 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -112,8 +113,22 @@ public class MainAppPanel extends JPanel{
 
         // Binning activation and progress
         binningPanel = new JPanel(new BorderLayout());
-        binningButton = new JButton("Run Binning"); // Change text here while binning to tell user it's in process.
-        binningButton.setEnabled(false);
+        binningButton = new JButton("Run Binning");
+        binningButton.setEnabled(false); // Disabled until user selects a CSV.
+        binningButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Change button display here while binning to tell user it's in process.
+                try {
+                    binningButton.setIcon(new ImageIcon("out/production/DGGSPointViewer/resources/loadinglinegraphic.gif"));
+                    binningButton.setText(null);
+                } catch (Exception ex) {
+                    System.out.println(ex);
+                    binningButton.setText("Binning...");
+                }
+                binningButton.setEnabled(false);
+                Main.app.performBinning();
+            }
+        } );
         binningPanel.add(binningButton, BorderLayout.NORTH);
         this.add(binningPanel);
 
