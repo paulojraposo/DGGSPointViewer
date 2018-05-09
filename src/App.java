@@ -16,6 +16,7 @@ public class App {
     private static LabeledCSVParser csvParser;
     private static ArrayList<String[]> pointDataTriplets;
     private MainGUI.AppFrame aF;
+    private boolean inCSVChosen;
 
     public App(){
 
@@ -28,9 +29,12 @@ public class App {
     }
 
     public void receiveUserFileReference(String aPath){
+        // Run csv running, and set the UI binning button enabled.
         this.userCSVFilePath = aPath;
         System.out.println(aPath);
+        inCSVChosen = true;
         this.readCSV(aPath);
+        this.aF.mainAppPanel.binningButton.setEnabled(true);
     }
 
     public void loadGeoJSON(){
