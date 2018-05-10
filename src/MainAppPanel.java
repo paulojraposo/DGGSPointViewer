@@ -12,9 +12,7 @@ public class MainAppPanel extends JPanel{
 
     public JFileChooser fc;
     int maxQTMLevels = 12;
-    int maximumTranslationDegrees = 9;
-    String[] levelOptions = new String[]{"1", "2", "3", "4", "5", "6", "7",
-            "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"};
+
     Border bGreyLine = BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1, true);
     Border bBinningTitled;
     Border bMAUPTitled;
@@ -81,21 +79,35 @@ public class MainAppPanel extends JPanel{
                 // TODO: make file chooser filter for CSV files.
                 int returnVal = fc.showOpenDialog(binningPanel);
                 chooseFileButton.setText(fc.getSelectedFile().getName());
-                Main.app.receiveUserFileReference(fc.getSelectedFile().toPath().toString());
+                Main.app.receiveUserCSVPath(fc.getSelectedFile().toPath().toString());
             }
         });
         binningPanel.add(chooseFileButton);
         levelChoosingLabel = new JLabel("Bin up to QTM level:");
         binningPanel.add(levelChoosingLabel);
-        levelIntersectionCalculationCB = new JComboBox<String>(levelOptions);
-        levelIntersectionCalculationCB.setSelectedIndex(15);
+        levelIntersectionCalculationCB = new JComboBox<String>(Main.app.levelOptions);
+        levelIntersectionCalculationCB.setSelectedIndex(Main.app.getMaxBinningLevel());
         // below from https://stackoverflow.com/questions/11008431/how-to-center-items-in-a-java-combobox
         ((JLabel) levelIntersectionCalculationCB.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
+        levelIntersectionCalculationCB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Object lvl = levelIntersectionCalculationCB.getSelectedItem();
+                Main.app.setMaxBinningLevel(Integer.parseInt(lvl.toString()));
+            }
+        } );
         binningPanel.add(levelIntersectionCalculationCB);
         attrToBinLabel = new JLabel("Attribute to bin:");
         binningPanel.add(attrToBinLabel);
         attrToBinCB = new JComboBox(); // The choices here need to be set once the CSV is read.
         attrToBinCB.setEnabled(false); // Also make it enabled when option is available.
+        attrToBinCB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String attr = attrToBinCB.getSelectedItem().toString();
+                Main.app.setAttrToBin(attr);
+            }
+        } );
         binningPanel.add(attrToBinCB);
         progressMessage = new JLabel(""); // starts blank, and as a filler in the GridLayout. Will be updated later to show progress messages.
         progressMessage.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -140,7 +152,7 @@ public class MainAppPanel extends JPanel{
         maupPanel.add(levelSlider);
         EWTranslateLabel = new JLabel("<html><b>Zoning:</b> Longitudinal shift<br>of mesh in degrees:</html>");
         maupPanel.add(EWTranslateLabel);
-        EWTranslateSlider = new JSlider(-1*maximumTranslationDegrees, maximumTranslationDegrees, 0);
+        EWTranslateSlider = new JSlider(-1*Main.app.getMaxTranslationDegrees(), Main.app.getMaxTranslationDegrees(), 0);
         EWTranslateSlider.setMajorTickSpacing(3);
         EWTranslateSlider.setMinorTickSpacing(1);
         EWTranslateSlider.setPaintTicks(true);

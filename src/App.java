@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class App {
 
@@ -18,6 +19,16 @@ public class App {
     private static ArrayList<String[]> pointDataTriplets;
     private MainGUI.AppFrame aF;
     private String[] csvFieldNames;
+    private int maximumTranslationDegrees = 9; // absolute value, -9 to 9.
+    private int maxBinningLevel = 11; // 11 by default, user-changeable.
+    private String attrToBin;
+    public String[] levelOptions = new String[]{"1", "2", "3", "4", "5", "6", "7",
+            "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"};
+    // To keep track of intersected QTM facets with binned data,
+    // we keep a hashmap of hashmaps. The first hashmap is keyed
+    // by QTM level, and those it returns to be keyed by
+    // longitudinal shift.
+    public HashMap<Integer,HashMap> intersectionLevelHM;
 
     public App(){
 
@@ -29,7 +40,23 @@ public class App {
         this.loadGeoJSON();
     }
 
-    public void receiveUserFileReference(String aPath){
+    public void setMaxBinningLevel(Integer lvl){
+        maxBinningLevel = lvl;
+    }
+
+    public Integer getMaxBinningLevel(){
+        return maxBinningLevel;
+    }
+
+    public Integer getMaxTranslationDegrees(){
+        return maximumTranslationDegrees;
+    }
+
+    public void setAttrToBin(String attribute){
+        attrToBin = attribute;
+    }
+
+    public void receiveUserCSVPath(String aPath){
         this.userCSVFilePath = aPath;
         this.parseCSV(this.userCSVFilePath);
     }
