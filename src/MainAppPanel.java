@@ -1,4 +1,3 @@
-import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -11,28 +10,27 @@ import java.awt.event.ActionListener;
 
 public class MainAppPanel extends JPanel{
 
-    // Some ubiquitous elements
     public JFileChooser fc;
     int maxQTMLevels = 12;
+    int maximumTranslationDegrees = 9;
     String[] levelOptions = new String[]{"1", "2", "3", "4", "5", "6", "7",
             "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"};
-//    String[] tempAttrsForTesting = new String[]{"one", "another", "one more"};
-//    String[] tempColorRampsForTesting = new String[]{"oranges", "greens", "blues"};
-    int maximumTranslationDegrees = 9;
     Border bGreyLine = BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1, true);
+    Border bBinningTitled;
     Border bMAUPTitled;
     Border bClassificationTitled;
+    JPanel logoPanel;
+    JLabel logoLabel;
 
     // Binning panel
     JPanel binningPanel;
-    JPanel logoPanel;
-    JLabel logoLabel;
-    JPanel fileChoosingPanel;
-    JLabel chosenFileLabel;
+    JLabel chooseFileLabel;
     JButton chooseFileButton;
-    JPanel levelIntersectionCalculationPanel;
+    JLabel attrToBinLabel;
+    JComboBox attrToBinCB;
     JLabel levelChoosingLabel;
     JComboBox<String> levelIntersectionCalculationCB;
+    JLabel progressMessage;
     JButton binningButton; // Change the text of this when processing to tell the user.
 
     // MAUP panel
@@ -57,7 +55,6 @@ public class MainAppPanel extends JPanel{
     public MainAppPanel(){
 
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-
         this.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(9, 9, 9, 9), new TitledBorder("MAUP Viewer")));
 
         // UT Logo
@@ -68,51 +65,41 @@ public class MainAppPanel extends JPanel{
         logoPanel.add(logoLabel);
         this.add(logoPanel);
 
-        // File choosing
-        fileChoosingPanel = new JPanel(new FlowLayout());
-        chooseFileButton = new JButton("Choose File...");
+        // Binning panel
+        binningPanel = new JPanel();
+        bBinningTitled = BorderFactory.createTitledBorder(bGreyLine, "Data Input and Binning", TitledBorder.LEFT,  TitledBorder.TOP, null, Color.gray);
+        binningPanel.setBorder(bBinningTitled);
+        binningPanel.setLayout(new GridLayout(4,2));
+        chooseFileLabel = new JLabel("Input CSV:");
+        binningPanel.add(chooseFileLabel);
+        chooseFileButton = new JButton("Choose File..."); // change button label when file chosen to indicate it to user.
         chooseFileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 fc = new JFileChooser();
                 fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 // TODO: make file chooser filter for CSV files.
-                int returnVal = fc.showOpenDialog(levelIntersectionCalculationPanel);
-                chosenFileLabel.setText(fc.getSelectedFile().getName());
+                int returnVal = fc.showOpenDialog(binningPanel);
+                chooseFileButton.setText(fc.getSelectedFile().getName());
                 Main.app.receiveUserFileReference(fc.getSelectedFile().toPath().toString());
             }
         });
-        chosenFileLabel = new JLabel("<Filename>");
-        fileChoosingPanel.add(chooseFileButton);
-        fileChoosingPanel.add(chosenFileLabel);
-        this.add(fileChoosingPanel);
-
-        // Level intersection calculation choosing
-        levelIntersectionCalculationPanel = new JPanel(new FlowLayout());
-        levelChoosingLabel = new JLabel("Calculate Intersections up to level:");
+        binningPanel.add(chooseFileButton);
+        levelChoosingLabel = new JLabel("Bin up to QTM level:");
+        binningPanel.add(levelChoosingLabel);
         levelIntersectionCalculationCB = new JComboBox<String>(levelOptions);
         levelIntersectionCalculationCB.setSelectedIndex(15);
-        levelIntersectionCalculationPanel.add(levelChoosingLabel);
-        levelIntersectionCalculationPanel.add(levelIntersectionCalculationCB);
-        this.add(levelIntersectionCalculationPanel);
-
-        // Attribute choosing
-//        GridLayout attrToBinPanelLayout = new GridLayout(1,2);
-//        attrToBinPanel = new JPanel(attrToBinPanelLayout);
-//        attrToBinLabel = new JLabel("Attribute to bin:");
-//        attrToBinCB = new JComboBox(); // The choices here need to be set once the CSV is read!
-//        attrToBinCB.setEnabled(false); // Also make it enabled when option is available.
-//        attrToBinPanel.add(attrToBinLabel);
-//        attrToBinPanel.add(attrToBinCB);
-//        this.add(attrToBinPanel);
-//        attrLabel = new JLabel("Attribute to map:");
-//        mappingParameterPanel.add(attrLabel);
-//        attrCB = new JComboBox<String>(tempAttrsForTesting);
-//        attrCB.setEnabled(false); // Enable when attribute chosen
-//        mappingParameterPanel.add(attrCB);
-
-        // Binning activation and progress
-        binningPanel = new JPanel(new BorderLayout());
+        // below from https://stackoverflow.com/questions/11008431/how-to-center-items-in-a-java-combobox
+        ((JLabel) levelIntersectionCalculationCB.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
+        binningPanel.add(levelIntersectionCalculationCB);
+        attrToBinLabel = new JLabel("Attribute to bin:");
+        binningPanel.add(attrToBinLabel);
+        attrToBinCB = new JComboBox(); // The choices here need to be set once the CSV is read.
+        attrToBinCB.setEnabled(false); // Also make it enabled when option is available.
+        binningPanel.add(attrToBinCB);
+        progressMessage = new JLabel(""); // starts blank, and as a filler in the GridLayout. Will be updated later to show progress messages.
+        progressMessage.setHorizontalAlignment(SwingConstants.RIGHT);
+        binningPanel.add(progressMessage);
         binningButton = new JButton("Run Binning");
         binningButton.setEnabled(false); // Disabled until user selects a CSV.
         binningButton.addActionListener(new ActionListener() {
@@ -129,7 +116,7 @@ public class MainAppPanel extends JPanel{
                 Main.app.performBinning();
             }
         } );
-        binningPanel.add(binningButton, BorderLayout.NORTH);
+        binningPanel.add(binningButton);
         this.add(binningPanel);
 
         // MAUP panel
@@ -183,7 +170,7 @@ public class MainAppPanel extends JPanel{
         quantilesSlider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                System.out.println("longitude slider moved"); // TODO: write useful method here.
+                System.out.println("quantiles slider moved"); // TODO: write useful method here.
             }
         });
         classingAndMappingPanel.add(quantilesSlider);
@@ -200,8 +187,5 @@ public class MainAppPanel extends JPanel{
 
         // TODO: add legend.
 
-//        this.add(drawMapButton);
-
     }
-
 }

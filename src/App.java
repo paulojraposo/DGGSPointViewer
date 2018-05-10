@@ -3,6 +3,7 @@ import com.Ostermiller.util.LabeledCSVParser;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwindx.examples.GeoJSONLoader;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -16,7 +17,7 @@ public class App {
     private static LabeledCSVParser csvParser;
     private static ArrayList<String[]> pointDataTriplets;
     private MainGUI.AppFrame aF;
-    private boolean inCSVChosen;
+    private String[] csvFieldNames;
 
     public App(){
 
@@ -29,18 +30,14 @@ public class App {
     }
 
     public void receiveUserFileReference(String aPath){
-        // Run csv running, and set the UI binning button enabled.
         this.userCSVFilePath = aPath;
-        System.out.println(aPath);
-        inCSVChosen = true;
-        this.readCSV(aPath);
-        this.aF.mainAppPanel.binningButton.setEnabled(true);
+        this.parseCSV(this.userCSVFilePath);
     }
 
     public void loadGeoJSON(){
         // TODO: Stub, develop me into something useful and dynamic!
         GeoJSONLoader gjLoader = new GeoJSONLoader();
-        Layer lyr = gjLoader.createLayerFromSource("out/production/DGGSPointViewer/resources/qtmlevels/qtmlvl5.geojson");
+        Layer lyr = gjLoader.createLayerFromSource("out/production/DGGSPointViewer/resources/qtmlevels/qtmlvl4.geojson");
         // TODO: modify layer symbology for adding?
         this.aF.getWwd().getModel().getLayers().add(lyr);
     }
@@ -51,25 +48,48 @@ public class App {
         return targetStream;
     }
 
-    private void readCSV(String filePath) {
-        pointDataTriplets = new ArrayList<>();
+    private void enableBinningButton(){
+        this.aF.mainAppPanel.binningButton.setEnabled(true);
+    }
+
+    private void setOptionsAndEnableAttrCB(){
+        DefaultComboBoxModel cbModel = new DefaultComboBoxModel(csvFieldNames);
+        this.aF.mainAppPanel.attrToBinCB.setModel(cbModel);
+        this.aF.mainAppPanel.attrToBinCB.setEnabled(true);
+    }
+
+    private void parseCSV(String filePath){
+        // Read the user CSV, determine the field names, set UI
+        // options enabled.
         InputStream iS = null;
         try {
             iS = pathToInputStream(filePath);
             csvParser = new LabeledCSVParser(new CSVParser(iS));
-            while (csvParser.getLine() != null) {
-                // NB: So far, hard-coding for these three fields in the input CSV.
-                String popS = csvParser.getValueByLabel("pop");
-                String latS = csvParser.getValueByLabel("latitude");
-                String lonS = csvParser.getValueByLabel("longitude");
-                String[] thisRow = {latS, lonS, popS};
-                System.out.println(thisRow[0] + "|" + thisRow[1] + "|" + thisRow[2]);
-                pointDataTriplets.add(thisRow);
-            }
+            csvFieldNames = csvParser.getLabels();
+            setOptionsAndEnableAttrCB();
+            enableBinningButton();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+//    private void readCSV(String filePath){
+//        pointDataTriplets = new ArrayList<>();
+//        InputStream iS = null;
+//        try {
+//            // Can iteratively get values this way, providing the field name:
+//            while (csvParser.getLine() != null) {
+//                String popS = csvParser.getValueByLabel("pop");
+//                String latS = csvParser.getValueByLabel("latitude");
+//                String lonS = csvParser.getValueByLabel("longitude");
+//                String[] thisRow = {latS, lonS, popS};
+//                System.out.println(thisRow[0] + "|" + thisRow[1] + "|" + thisRow[2]);
+//                pointDataTriplets.add(thisRow);
+//            }
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     public void performBinning(){
         // Here, we need to run a Python script to perform the geodetic
