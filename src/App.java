@@ -79,7 +79,7 @@ public class App {
         this.aF.mainAppPanel.binningButton.setEnabled(true);
     }
 
-    private void setOptionsAndEnableAttrCB(){
+    private void setAttrCBOptionsAndEnable(){
         DefaultComboBoxModel cbModel = new DefaultComboBoxModel(csvFieldNames);
         this.aF.mainAppPanel.attrToBinCB.setModel(cbModel);
         this.aF.mainAppPanel.attrToBinCB.setEnabled(true);
@@ -93,30 +93,19 @@ public class App {
             iS = pathToInputStream(filePath);
             csvParser = new LabeledCSVParser(new CSVParser(iS));
             csvFieldNames = csvParser.getLabels();
-            setOptionsAndEnableAttrCB();
+            setAttrCBOptionsAndEnable();
             enableBinningButton();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-//    private void readCSV(String filePath){
-//        pointDataTriplets = new ArrayList<>();
-//        InputStream iS = null;
-//        try {
-//            // Can iteratively get values this way, providing the field name:
-//            while (csvParser.getLine() != null) {
-//                String popS = csvParser.getValueByLabel("pop");
-//                String latS = csvParser.getValueByLabel("latitude");
-//                String lonS = csvParser.getValueByLabel("longitude");
-//                String[] thisRow = {latS, lonS, popS};
-//                System.out.println(thisRow[0] + "|" + thisRow[1] + "|" + thisRow[2]);
-//                pointDataTriplets.add(thisRow);
-//            }
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    public void plotCSVPoints(){
+        MarkerLayerMaker mlm = new MarkerLayerMaker(csvParser);
+        mlm.makeMarkers();
+        Layer markerLayer = mlm.makeMarkerLayer();
+        this.aF.getWwd().getModel().getLayers().add(markerLayer);
+    }
 
     public void performBinning(){
         // Here, we need to run a Python script to perform the geodetic
@@ -129,5 +118,26 @@ public class App {
         // load onto the globe.
 
         System.out.println("Would be binning here.");
+
+        plotCSVPoints(); // just for testing and for show right now.
+
     }
+        private void readCSV(String filePath){
+        pointDataTriplets = new ArrayList<>();
+        InputStream iS = null;
+        try {
+            // Can iteratively get values this way, providing the field name:
+            while (csvParser.getLine() != null) {
+                String popS = csvParser.getValueByLabel("pop");
+                String latS = csvParser.getValueByLabel("latitude");
+                String lonS = csvParser.getValueByLabel("longitude");
+                String[] thisRow = {latS, lonS, popS};
+                System.out.println(thisRow[0] + "|" + thisRow[1] + "|" + thisRow[2]);
+                pointDataTriplets.add(thisRow);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
