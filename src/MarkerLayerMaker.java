@@ -30,8 +30,10 @@ public class MarkerLayerMaker {
         markers = new ArrayList<Marker>();
         try {
             while (this.lCSVParser.getLine() != null) {
-                double lat = Double.valueOf(this.lCSVParser.getValueByLabel("LATITUDE"));
-                double lon = Double.valueOf(this.lCSVParser.getValueByLabel("LONGITUDE"));
+                // We search the CSV data for these latitude and longitude fields specifically,
+                // so we require exactly those names, case-sensitive, and unique among the fields.
+                double lat = Double.valueOf(this.lCSVParser.getValueByLabel("latitude"));
+                double lon = Double.valueOf(this.lCSVParser.getValueByLabel("longitude"));
                 Angle latAngle = Angle.fromDegrees(lat);
                 Angle lonAngle = Angle.fromDegrees(lon);
                 LatLon ll = new LatLon(latAngle, lonAngle);

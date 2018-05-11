@@ -287,7 +287,7 @@ def main():
                 pointCount  = len(thesePoints)
                 statValues  = [pointTuple[2] for pointTuple in thesePoints ] # index 2 is stat value in point tuple above.
                 statSum     = sum(statValues)
-                statMode    = stats.mode(statValues)
+                statMode    = stats.mode(statValues, axis=None).mode[0] # Stats.mode assumes multiple input arrays, and returns multiple modes; we assume only one. See scipy documentation.
                 statMedian  = np.median(statValues)
                 statMean    = statSum / len(statValues)
                 d           = [ (i - statMean) ** 2 for i in statValues ]
