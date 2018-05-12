@@ -33,10 +33,7 @@ public class MainAppPanel extends JPanel{
 
     // MAUP panel
     JPanel maupPanel;
-    JLabel attrLabel;
-    JComboBox<String> attrCB;
     JLabel levelLabel;
-    JComboBox<String> levelCB;
     JSlider levelSlider;
     JLabel EWTranslateLabel;
     JSlider EWTranslateSlider;
@@ -47,7 +44,6 @@ public class MainAppPanel extends JPanel{
     JComboBox<String> colorCB;
     JLabel quantilesLabel;
     JSlider quantilesSlider;
-    JButton drawMapButton;
 
 
     public MainAppPanel(){
@@ -101,6 +97,7 @@ public class MainAppPanel extends JPanel{
         binningPanel.add(attrToBinLabel);
         attrToBinCB = new JComboBox(); // The choices here need to be set once the CSV is read.
         attrToBinCB.setEnabled(false); // Also make it enabled when option is available.
+        ((JLabel) attrToBinCB.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
         attrToBinCB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -117,13 +114,16 @@ public class MainAppPanel extends JPanel{
         binningButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // Change button display here while binning to tell user it's in process.
+                // Update it regularly to show progress.
                 try {
-                    binningButton.setIcon(new ImageIcon("out/production/DGGSPointViewer/resources/loadinglinegraphic.gif"));
-                    binningButton.setText(null);
+                    // binningButton.setIcon(new ImageIcon("out/production/DGGSPointViewer/resources/loadinglinegraphic.gif"));
+                    binningButton.setText("Binning...");
                 } catch (Exception ex) {
                     System.out.println(ex);
-                    binningButton.setText("Binning...");
                 }
+                chooseFileButton.setEnabled(false);
+                levelIntersectionCalculationCB.setEnabled(false);
+                attrToBinCB.setEnabled(false);
                 binningButton.setEnabled(false);
                 Main.app.performBinning();
             }
