@@ -13,6 +13,9 @@
 # and  Randall Brown (ranbrown8448 [at] gmail.com) at the Department
 # of Geography, University of Tennessee, Knoxville.
 
+# TODO: this script seems to miss a few points that should intersect
+# with a QTM facet, for mysterious reasons - I can't see a geometric
+# or syntax reason why. This must be fixed.
 
 # Imports ///////////////////////////////////////////////////////////////////////////
 
@@ -32,29 +35,20 @@ geodesically, on a spherical model of the Earth."""
 
 # Script ////////////////////////////////////////////////////////////////////////////////
 
-
 class PointAndPolygonIntersectionChecker:
 
     def __init__(self):
-        pass
+        # See comments in nvector source: https://github.com/pbrod/Nvector/blob/master/nvector/objects.py
+        self.nvFrame = nv.FrameE(); # defaults to WGS84, with flattening.
+        self.nvFrame.f = 0.0        # zero flattening, makes perfect sphere
 
     def checkSpheroidal(self, aWKTPoint, aWKTPolygon):
-
-        # TODO: Fix this so it doesn't check arc paths that are just singularities
-        #       of the north and south poles. Until that's fixed, the distinction
-        #       of whether a cross-track's point of orthogonal intersection with
-        #       the gcArc will be wrong in polar facets - that stuff is commented-
-        #       out below.
 
         """Checks for point-in-triangle intersection using a spherical
         model of the Earth."""
 
-        # See comments in nvector source: https://github.com/pbrod/Nvector/blob/master/nvector/objects.py
-        nvFrame = nv.FrameE(); # defaults to WGS84, with flattening.
-        nvFrame.f = 0.0        # zero flattening, makes perfect sphere
-
         point   = ogr.CreateGeometryFromWkt(aWKTPoint)
-        nvPoint = nvFrame.GeoPoint(float(point.GetY()), float(point.GetX()), degrees=True) # lat then lon
+        nvPoint = self.nvFrame.GeoPoint(float(point.GetY()), float(point.GetX()), degrees=True) # lat then lon
 
         polygon  = ogr.CreateGeometryFromWkt(aWKTPolygon)
         subGeom  = polygon.GetGeometryRef(0) # Assumes only one outside linear ring!
@@ -66,15 +60,20 @@ class PointAndPolygonIntersectionChecker:
         liesLeftList = []
         # intersectionIsOnPathList = []
 
-
         for vI in range(len(subGeomVertices) - 1): # Don't run on last vertex since there's none that follows it.
 
             start = subGeomVertices[vI]
             end = subGeomVertices[vI + 1]
 
+            # Don't check the point distance to the arc if the arc is actually just a polar
+            # singularity - important in the polar facets. Check this using latitude values.
+            if (start[1] == 90.0 and end[1] == 90.0) or (start[1] == -90.0 and end[1] == -90.0):
+                continue
+
             # Below, nvector wants lat then lon. That's the reverse of what OGR stores, lon then lat.
-            pathStartPoint = nvFrame.GeoPoint(float(start[1]), float(start[0]), degrees=True) # lat then lon
-            pathEndPoint = nvFrame.GeoPoint(float(end[1]  ), float(end[0]  ), degrees=True) # lat then lon
+            pathStartPoint = self.nvFrame.GeoPoint(float(start[1]), float(start[0]), degrees=True) # lat then lon
+            pathEndPoint = self.nvFrame.GeoPoint(float(end[1]  ), float(end[0]  ), degrees=True) # lat then lon
+
             gcArc = nv.GeoPath(pathStartPoint, pathEndPoint)
             crossTrackDist = gcArc.cross_track_distance(nvPoint, method='greatcircle').ravel()
             if crossTrackDist <= 0.0:
@@ -185,6 +184,7 @@ def main():
                 # Remove point, since it won't intersect with another facet at this level.
                 # Saves time and work.
                 del worldStatPoints[ptShadowIndex]
+                pointsPopped += 1
                 # print("Removed a point, worldStatPoints is {} items long.".format(str(len(worldStatPoints))))
 
                 synopticIntersectionTotal += 1
@@ -306,17 +306,20 @@ def main():
 
             dst_layer.CreateFeature(feature)
 
-            feature.Destroy()  # Destroy the feature to free resources
+            feature.Destroy()  # Destroy the feature to free resources.
 
             outFacetCount += 1
 
-    dst_ds.Destroy()  # Destroy the data source to free resouces
+    dst_ds.Destroy()  # Destroy the data source to free resouces.
 
     intersectedFacetsCount = len(pointsContainedByPolygon.keys())
     print()
     print("There were {} input points and {} intersections found overall.".format(str(totalPointCount), str(synopticIntersectionTotal)))
     print("There were {} input facets, and {} facets were found to have intersections with points.".format(str(facetCount), str(intersectedFacetsCount)))
     print("The output file contains {} facets.".format(str(outFacetCount)))
+    print("Length of worldStatPoints remains: {}".format(str(len(worldStatPoints))))
+    # print(worldStatPoints)
+    # print("{} pointsPopped.".format(str(pointsPopped)))
 
 if __name__ == '__main__':
     main()
