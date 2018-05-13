@@ -66,6 +66,7 @@ class PointAndPolygonIntersectionChecker:
         liesLeftList = []
         # intersectionIsOnPathList = []
 
+
         for vI in range(len(subGeomVertices) - 1): # Don't run on last vertex since there's none that follows it.
 
             start = subGeomVertices[vI]
@@ -140,7 +141,6 @@ def main():
         latIndex = headers.index('latitude')
         lonIndex = headers.index('longitude')
         statFieldIndex = headers.index(inField) # This is the field that is designated from the shell, for statistical calculations.
-        gidIndex = headers.index('geonameid')
 
         # Populate worldStatPoints
         for row in csvreader:
@@ -161,13 +161,10 @@ def main():
     for facet in orig_Layer:
 
         facetGeomWKT = facet.GetGeometryRef().ExportToWkt()
-        facetID = facet.GetField("ID")
-
-        # Create a copy of worldStatPoints we'll modify as we go through the following nested loop.
-        worldStatPointsCopy = list(worldStatPoints)
+        facetID = facet.GetField("QTMID")
 
         ptShadowIndex = 0
-        for pt in worldStatPointsCopy:
+        for pt in worldStatPoints:
 
             thisLat = pt[0]
             thisLon = pt[1]
@@ -180,17 +177,17 @@ def main():
 
             if pointIsWithinFacet:
 
-                synopticIntersectionTotal += 1
-
                 if facetID in pointsContainedByPolygon.keys():
                     pointsContainedByPolygon[facetID].append(pt)
                 else:
                     pointsContainedByPolygon[facetID] = [pt]
 
-                # TODO: Fix this, probably spuriously removing points, possibly an indexing mistake.
                 # Remove point, since it won't intersect with another facet at this level.
                 # Saves time and work.
-                # del worldStatPointsCopy[ptShadowIndex]
+                del worldStatPoints[ptShadowIndex]
+                # print("Removed a point, worldStatPoints is {} items long.".format(str(len(worldStatPoints))))
+
+                synopticIntersectionTotal += 1
 
             ptShadowIndex += 1
 
@@ -211,7 +208,7 @@ def main():
     dst_layer = dst_ds.CreateLayer(fName, sRef, geom_type=ogr.wkbPolygon)
     layer_defn = dst_layer.GetLayerDefn()
     #
-    idFieldName       = 'ID'
+    idFieldName       = 'QTMID'
     countFieldName    = 'PointCount'
     sumFieldName      = 'Sum'
     modeFieldName     = 'Mode'
@@ -249,7 +246,7 @@ def main():
     # Write features and attribute summaries to output file.
     for feat in orig_Layer:
 
-        thisID = feat.GetField('ID')
+        thisID = feat.GetField('QTMID')
 
         # To use the --oi shell argument (see above), we determine whether
         # this facet had any points intersect with it by testing whether
