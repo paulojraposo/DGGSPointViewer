@@ -13,9 +13,6 @@
 # and  Randall Brown (ranbrown8448 [at] gmail.com) at the Department
 # of Geography, University of Tennessee, Knoxville.
 
-# TODO: this script seems to miss a few points that should intersect
-# with a QTM facet, for mysterious reasons - I can't see a geometric
-# or syntax reason why. This must be fixed.
 
 # Imports ///////////////////////////////////////////////////////////////////////////
 
@@ -27,7 +24,7 @@ from osgeo import ogr, osr
 
 # Constants /////////////////////////////////////////////////////////////////////////
 desc = """Given one set of QTM facets in a GeoJSON file, and one
-CSV file of lat/lon locations with ratio numerical data to be sumarized,
+CSV file of lat/lon locations with ratio numerical data to be summarized,
 this script produces an indentical QTM facets file, except with
 statistical summaries for point intersections and descriptive statistics
 added, having used the facets to bin the points. Intersection is done
@@ -35,20 +32,23 @@ geodesically, on a spherical model of the Earth."""
 
 # Script ////////////////////////////////////////////////////////////////////////////////
 
+
 class PointAndPolygonIntersectionChecker:
 
     def __init__(self):
-        # See comments in nvector source: https://github.com/pbrod/Nvector/blob/master/nvector/objects.py
-        self.nvFrame = nv.FrameE(); # defaults to WGS84, with flattening.
-        self.nvFrame.f = 0.0        # zero flattening, makes perfect sphere
+        pass
 
     def checkSpheroidal(self, aWKTPoint, aWKTPolygon):
 
         """Checks for point-in-triangle intersection using a spherical
         model of the Earth."""
 
+        # See comments in nvector source: https://github.com/pbrod/Nvector/blob/master/nvector/objects.py
+        nvFrame = nv.FrameE(); # Defaults to WGS84, with flattening.
+        nvFrame.f = 0.0 # Zero flattening, makes perfect sphere.
+
         point   = ogr.CreateGeometryFromWkt(aWKTPoint)
-        nvPoint = self.nvFrame.GeoPoint(float(point.GetY()), float(point.GetX()), degrees=True) # lat then lon
+        nvPoint = nvFrame.GeoPoint(float(point.GetY()), float(point.GetX()), degrees=True) # lat then lon
 
         polygon  = ogr.CreateGeometryFromWkt(aWKTPolygon)
         subGeom  = polygon.GetGeometryRef(0) # Assumes only one outside linear ring!
@@ -58,22 +58,13 @@ class PointAndPolygonIntersectionChecker:
         # between successive vertices. Keep track of whether the points
         # lie left of the arc path (arcs go CCW as seen from directly above).
         liesLeftList = []
-        # intersectionIsOnPathList = []
-
+        #
         for vI in range(len(subGeomVertices) - 1): # Don't run on last vertex since there's none that follows it.
-
             start = subGeomVertices[vI]
             end = subGeomVertices[vI + 1]
-
-            # Don't check the point distance to the arc if the arc is actually just a polar
-            # singularity - important in the polar facets. Check this using latitude values.
-            if (start[1] == 90.0 and end[1] == 90.0) or (start[1] == -90.0 and end[1] == -90.0):
-                continue
-
-            # Below, nvector wants lat then lon. That's the reverse of what OGR stores, lon then lat.
-            pathStartPoint = self.nvFrame.GeoPoint(float(start[1]), float(start[0]), degrees=True) # lat then lon
-            pathEndPoint = self.nvFrame.GeoPoint(float(end[1]  ), float(end[0]  ), degrees=True) # lat then lon
-
+            # Below, nvector wants lat then lon. That's the reverse of what OGR stores, x then y.
+            pathStartPoint = nvFrame.GeoPoint(float(start[1]), float(start[0]), degrees=True) # lat then lon
+            pathEndPoint = nvFrame.GeoPoint(float(end[1]  ), float(end[0]  ), degrees=True) # lat then lon
             gcArc = nv.GeoPath(pathStartPoint, pathEndPoint)
             crossTrackDist = gcArc.cross_track_distance(nvPoint, method='greatcircle').ravel()
             if crossTrackDist <= 0.0:
@@ -81,22 +72,20 @@ class PointAndPolygonIntersectionChecker:
             else:
                 liesLeftList.append(False)
             iPoint = gcArc.closest_point_on_great_circle(nvPoint)
-            # if gcArc.on_path(iPoint):
-            #     intersectionIsOnPathList.append(True)
-            # else:
-            #     intersectionIsOnPathList.append(False)
 
         intersects = False
 
-        if ( all(liesLeftList) ): # and (all(intersectionIsOnPathList )) ):
+        if ( all(liesLeftList) ):
             intersects = True
+        else:
+            pass
 
         return intersects
 
 
 def main():
 
-    # Parse arguments.
+    # Parse arguments. Take in 4 required parameters and 1 optional parameter.
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument('INFACETSGEOJSON', help='GeoJSON file of QTM facets to calculate intersection against points for.')
     parser.add_argument('POINTSCSV', help='CSV file with points to calculate intersection against QTM facets for. Must contain fields for lat and lon coordinates named exactly "latitude" and "longitude", case-specific.')
@@ -123,25 +112,24 @@ def main():
     # List to contain 3-tuples, one for each CSV point, of form (lat, lon, attrVal).
     worldStatPoints = []
 
-    # Read QTM facets
+    # Read QTM facets.
     print("Reading QTM facets from GeoJSON...")
     driver = ogr.GetDriverByName("GeoJSON")
     dataSource = driver.Open(inFacetsFilePath, 0)
     orig_Layer = dataSource.GetLayer()
     facetCount = orig_Layer.GetFeatureCount()
 
-    # Read CSV file
+    # Read CSV file.
     print("Reading points from CSV...")
     with open(points) as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',', quotechar='"') #, dialect=csv.excel)
         headers = next(csvreader)
-
-        # Find field indexes from CSV file headers
+        # Find field indexes from CSV file headers.
         latIndex = headers.index('latitude')
         lonIndex = headers.index('longitude')
         statFieldIndex = headers.index(inField) # This is the field that is designated from the shell, for statistical calculations.
 
-        # Populate worldStatPoints
+        # Populate worldStatPoints.
         for row in csvreader:
             lat = row[latIndex]
             lon = row[lonIndex]
@@ -155,15 +143,17 @@ def main():
     intersectionChecker = PointAndPolygonIntersectionChecker()
 
     # Loop through each facet, and then each point, in nested loops, and check intersection.
-    print("Beginning intersection tests.")
+    print("Beginning intersection tests...")
     facetShadowIndex = 0
     for facet in orig_Layer:
 
         facetGeomWKT = facet.GetGeometryRef().ExportToWkt()
         facetID = facet.GetField("QTMID")
 
-        ptShadowIndex = 0
-        for pt in worldStatPoints:
+        # Create a copy of worldStatPoints we'll modify as we go through the following nested loop.
+        worldStatPointsCopy = list(worldStatPoints)
+
+        for pt in worldStatPointsCopy:
 
             thisLat = pt[0]
             thisLon = pt[1]
@@ -176,20 +166,29 @@ def main():
 
             if pointIsWithinFacet:
 
+                synopticIntersectionTotal += 1
+
                 if facetID in pointsContainedByPolygon.keys():
                     pointsContainedByPolygon[facetID].append(pt)
                 else:
                     pointsContainedByPolygon[facetID] = [pt]
 
+                # TODO: Fix this, probably spuriously removing points, possibly an indexing mistake.
+                # NB: Be careful! This ate all of my weekend of May 12th 2018 STILL without getting
+                # fixed properly :(
+                # Ideas - Python's way of finding the index of something is finding the first, but
+                #         wrong match? Maybe change the for loop to old-fashioned index-driven, and
+                #         use those indexes instead of determined ones to delete items.
+                #       - Trying to be rid of worldStatPointsCopy and just use worldStatPoints
+                #         in place seems to have been the source of the problem. Script was missing
+                #         some intersections. There might be something about deleting list items
+                #         while iterating over that list that I'm not understanding.
+                #       - Maybe instead of deleting worldStatPoints items, replace them with None,
+                #         and modify the loop to only work with non-None elements of worldStatPoints.
+                #
                 # Remove point, since it won't intersect with another facet at this level.
                 # Saves time and work.
-                del worldStatPoints[ptShadowIndex]
-                pointsPopped += 1
-                # print("Removed a point, worldStatPoints is {} items long.".format(str(len(worldStatPoints))))
-
-                synopticIntersectionTotal += 1
-
-            ptShadowIndex += 1
+                # del worldStatPointsCopy[ptShadowIndex]
 
         sys.stdout.write("\r")
         prcnt = ((facetShadowIndex + 1) * 100) / facetCount
@@ -207,7 +206,6 @@ def main():
     fName = os.path.splitext(os.path.split(outFile)[1])[0]
     dst_layer = dst_ds.CreateLayer(fName, sRef, geom_type=ogr.wkbPolygon)
     layer_defn = dst_layer.GetLayerDefn()
-    #
     idFieldName       = 'QTMID'
     countFieldName    = 'PointCount'
     sumFieldName      = 'Sum'
@@ -265,13 +263,12 @@ def main():
             #
             # pointCount is zero unless there were intersecting points,
             # in which case it's the length of the list of intersecting
-            # points.
-            #
-            # Similarly, each of the other stats default to zero unless
-            # there were points intersecting here.
+            # points. Similarly, each of the other stats default to
+            # zero unless there were points intersecting here.
             #
             pointCount  = 0
             statSum     = 0.0
+            statMode    = 0.0
             statMedian  = 0.0
             statMean    = 0.0
             statStDev   = 0.0
@@ -282,7 +279,7 @@ def main():
 
                 thesePoints = pointsContainedByPolygon[thisID]
                 pointCount  = len(thesePoints)
-                statValues  = [pointTuple[2] for pointTuple in thesePoints ] # index 2 is stat value in point tuple above.
+                statValues  = [pointTuple[2] for pointTuple in thesePoints ] # Index 2 is stat value in point tuple above.
                 statSum     = sum(statValues)
                 statMode    = stats.mode(statValues, axis=None).mode[0] # Stats.mode assumes multiple input arrays, and returns multiple modes; we assume only one. See scipy documentation.
                 statMedian  = np.median(statValues)
@@ -317,9 +314,6 @@ def main():
     print("There were {} input points and {} intersections found overall.".format(str(totalPointCount), str(synopticIntersectionTotal)))
     print("There were {} input facets, and {} facets were found to have intersections with points.".format(str(facetCount), str(intersectedFacetsCount)))
     print("The output file contains {} facets.".format(str(outFacetCount)))
-    print("Length of worldStatPoints remains: {}".format(str(len(worldStatPoints))))
-    # print(worldStatPoints)
-    # print("{} pointsPopped.".format(str(pointsPopped)))
 
 if __name__ == '__main__':
     main()
