@@ -9,20 +9,23 @@
 #                                                /____/          /_/          /____/
 
 
-# Written by Written by Paulo Raposo (pauloj.raposo [at] outlook.com)
-# and  Randall Brown (ranbrown8448 [at] gmail.com) at the Department
-# of Geography, University of Tennessee, Knoxville.
+# Written by Paulo Raposo (pauloj.raposo [at] outlook.com) and
+# Randall Brown (ranbrown8448 [at] gmail.com) at the Department
+# of Geography, University of Tennessee, Knoxville, Spring &
+# Summer 2018.
 
 
 # Imports ///////////////////////////////////////////////////////////////////////////
 
-import os, sys, argparse, csv, math
+import os, sys, argparse, csv, math, datetime
 import numpy as np
 import nvector as nv
 from scipy import stats
 from osgeo import ogr, osr
 
+
 # Constants /////////////////////////////////////////////////////////////////////////
+
 desc = """Given one set of QTM facets in a GeoJSON file, and one
 CSV file of lat/lon locations with ratio numerical data to be summarized,
 this script produces an indentical QTM facets file, except with
@@ -30,60 +33,51 @@ statistical summaries for point intersections and descriptive statistics
 added, having used the facets to bin the points. Intersection is done
 geodesically, on a spherical model of the Earth."""
 
-# Script ////////////////////////////////////////////////////////////////////////////////
 
+# Script ////////////////////////////////////////////////////////////////////////////
 
-class PointAndPolygonIntersectionChecker:
+def checkSpheroidal(aWKTPoint, aWKTPolygon):
 
-    def __init__(self):
-        pass
+    """Checks for point-in-triangle intersection using a spherical
+    model of the Earth."""
 
-    def checkSpheroidal(self, aWKTPoint, aWKTPolygon):
+    # See comments in nvector source: https://github.com/pbrod/Nvector/blob/master/nvector/objects.py
+    nvFrame   = nv.FrameE(); # Defaults to WGS84, with flattening.
+    nvFrame.f = 0.0 # Zero flattening, makes perfect sphere.
 
-        """Checks for point-in-triangle intersection using a spherical
-        model of the Earth."""
+    point   = ogr.CreateGeometryFromWkt(aWKTPoint)
+    nvPoint = nvFrame.GeoPoint(float(point.GetY()), float(point.GetX()), degrees=True) # lat then lon
 
-        # See comments in nvector source: https://github.com/pbrod/Nvector/blob/master/nvector/objects.py
-        nvFrame = nv.FrameE(); # Defaults to WGS84, with flattening.
-        nvFrame.f = 0.0 # Zero flattening, makes perfect sphere.
+    polygon  = ogr.CreateGeometryFromWkt(aWKTPolygon)
+    subGeom  = polygon.GetGeometryRef(0) # Assumes only one outside linear ring!
+    subGeomVertices = subGeom.GetPoints()
 
-        point   = ogr.CreateGeometryFromWkt(aWKTPoint)
-        nvPoint = nvFrame.GeoPoint(float(point.GetY()), float(point.GetX()), degrees=True) # lat then lon
-
-        polygon  = ogr.CreateGeometryFromWkt(aWKTPolygon)
-        subGeom  = polygon.GetGeometryRef(0) # Assumes only one outside linear ring!
-        subGeomVertices = subGeom.GetPoints()
-
-        # Iterate over polygon vertices to build Great Circle arcs
-        # between successive vertices. Keep track of whether the points
-        # lie left of the arc path (arcs go CCW as seen from directly above).
-        liesLeftList = []
-        #
-        for vI in range(len(subGeomVertices) - 1): # Don't run on last vertex since there's none that follows it.
-            start = subGeomVertices[vI]
-            end = subGeomVertices[vI + 1]
-            # Below, nvector wants lat then lon. That's the reverse of what OGR stores, x then y.
-            pathStartPoint = nvFrame.GeoPoint(float(start[1]), float(start[0]), degrees=True) # lat then lon
-            pathEndPoint = nvFrame.GeoPoint(float(end[1]  ), float(end[0]  ), degrees=True) # lat then lon
-            gcArc = nv.GeoPath(pathStartPoint, pathEndPoint)
-            crossTrackDist = gcArc.cross_track_distance(nvPoint, method='greatcircle').ravel()
-            if crossTrackDist <= 0.0:
-                liesLeftList.append(True)
-            else:
-                liesLeftList.append(False)
-            iPoint = gcArc.closest_point_on_great_circle(nvPoint)
-
-        intersects = False
-
-        if ( all(liesLeftList) ):
-            intersects = True
+    # Iterate over polygon vertices to build Great Circle arcs
+    # between successive vertices. Keep track of whether the points
+    # lie left of the arc path (arcs go CCW as seen from directly above).
+    liesLeftList = []
+    #
+    for vI in range(len(subGeomVertices) - 1): # Don't run on last vertex since there's none that follows it.
+        start = subGeomVertices[vI]
+        end = subGeomVertices[vI + 1]
+        # Below, nvector wants lat then lon. That's the reverse of what OGR stores, x then y.
+        pathStartPoint = nvFrame.GeoPoint(float(start[1]), float(start[0]), degrees=True) # lat then lon
+        pathEndPoint = nvFrame.GeoPoint(float(end[1]  ), float(end[0]  ), degrees=True) # lat then lon
+        gcArc = nv.GeoPath(pathStartPoint, pathEndPoint)
+        crossTrackDist = gcArc.cross_track_distance(nvPoint, method='greatcircle').ravel()
+        if crossTrackDist <= 0.0:
+            liesLeftList.append(True)
         else:
-            pass
+            liesLeftList.append(False)
+        iPoint = gcArc.closest_point_on_great_circle(nvPoint)
 
-        return intersects
+    intersects = all(liesLeftList) # True if everything in liesLeftList evaluates to True, else False.
 
+    return intersects
 
 def main():
+
+    startTime = datetime.datetime.now()
 
     # Parse arguments. Take in 4 required parameters and 1 optional parameter.
     parser = argparse.ArgumentParser(description=desc)
@@ -94,7 +88,7 @@ def main():
     parser.add_argument('--oi', default=False, action="store_true", help='Write only those facets that have 1 or more point intersect them to the output.')
     args = parser.parse_args()
     inFacetsFilePath = args.INFACETSGEOJSON
-    points = args.POINTSCSV
+    points  = args.POINTSCSV
     outFile = args.OUTFACETSGEOJSON
     inField = args.FIELD
     onlyIntersections = False
@@ -114,7 +108,7 @@ def main():
 
     # Read QTM facets.
     print("Reading QTM facets from GeoJSON...")
-    driver = ogr.GetDriverByName("GeoJSON")
+    driver     = ogr.GetDriverByName("GeoJSON")
     dataSource = driver.Open(inFacetsFilePath, 0)
     orig_Layer = dataSource.GetLayer()
     facetCount = orig_Layer.GetFeatureCount()
@@ -123,78 +117,68 @@ def main():
     print("Reading points from CSV...")
     with open(points) as csvfile:
         csvreader = csv.reader(csvfile, delimiter=',', quotechar='"') #, dialect=csv.excel)
-        headers = next(csvreader)
+        headers   = next(csvreader)
         # Find field indexes from CSV file headers.
-        latIndex = headers.index('latitude')
-        lonIndex = headers.index('longitude')
+        latIndex       = headers.index('latitude')
+        lonIndex       = headers.index('longitude')
         statFieldIndex = headers.index(inField) # This is the field that is designated from the shell, for statistical calculations.
 
         # Populate worldStatPoints.
         for row in csvreader:
-            lat = row[latIndex]
-            lon = row[lonIndex]
-            statVal = row[statFieldIndex]
+            lat        = row[latIndex]
+            lon        = row[lonIndex]
+            statVal    = row[statFieldIndex]
             pointTuple = (float(lat), float(lon), float(statVal)) # NB: lat then lon
             worldStatPoints.append(pointTuple)
 
     totalPointCount = len(worldStatPoints)
 
-    # Create a PointAndPolygonIntersectionChecker object.
-    intersectionChecker = PointAndPolygonIntersectionChecker()
-
     # Loop through each facet, and then each point, in nested loops, and check intersection.
     print("Beginning intersection tests...")
     facetShadowIndex = 0
+    # NB: I had tried to iterate over orig_Layer using this:
+    # for fI in range(len(orig_Layer))
+    # But that was causing a runtime segmentation fault.
+    # Perhaps something in OGR was unhappy about that!
     for facet in orig_Layer:
 
         facetGeomWKT = facet.GetGeometryRef().ExportToWkt()
-        facetID = facet.GetField("QTMID")
+        facetID      = facet.GetField("QTMID")
 
-        # Create a copy of worldStatPoints we'll modify as we go through the following nested loop.
-        worldStatPointsCopy = list(worldStatPoints)
+        for pI in range(len(worldStatPoints)):
 
-        for pt in worldStatPointsCopy:
+            # We only proceed to intersection checking if it isn't None.
+            if worldStatPoints[pI]:
 
-            thisLat = pt[0]
-            thisLon = pt[1]
-            point = ogr.Geometry(ogr.wkbPoint)
-            point.AddPoint(thisLon, thisLat) # lon then lat
-            pointGeomWKT = str(point)
+                thisLat = worldStatPoints[pI][0]
+                thisLon = worldStatPoints[pI][1]
+                point   = ogr.Geometry(ogr.wkbPoint)
+                point.AddPoint(thisLon, thisLat) # lon then lat
+                pointGeomWKT = str(point)
 
-            # The intersection check, returns boolean.
-            pointIsWithinFacet = intersectionChecker.checkSpheroidal(pointGeomWKT, facetGeomWKT)
+                # The intersection check, returns boolean.
+                pointIsWithinFacet = checkSpheroidal(pointGeomWKT, facetGeomWKT)
 
-            if pointIsWithinFacet:
+                if pointIsWithinFacet:
 
-                synopticIntersectionTotal += 1
+                    # Add it to those points in pointsContainedByPolygon keyed by this
+                    # facetID value, or create that list in the dictionary under this
+                    # facetID value.
+                    if facetID in pointsContainedByPolygon.keys():
+                        pointsContainedByPolygon[facetID].append(worldStatPoints[pI])
+                    else:
+                        pointsContainedByPolygon[facetID] = [ worldStatPoints[pI] ]
 
-                if facetID in pointsContainedByPolygon.keys():
-                    pointsContainedByPolygon[facetID].append(pt)
-                else:
-                    pointsContainedByPolygon[facetID] = [pt]
+                    synopticIntersectionTotal += 1
 
-                # TODO: Fix this, probably spuriously removing points, possibly an indexing mistake.
-                # NB: Be careful! This ate all of my weekend of May 12th 2018 STILL without getting
-                # fixed properly :(
-                # Ideas - Python's way of finding the index of something is finding the first, but
-                #         wrong match? Maybe change the for loop to old-fashioned index-driven, and
-                #         use those indexes instead of determined ones to delete items.
-                #       - Trying to be rid of worldStatPointsCopy and just use worldStatPoints
-                #         in place seems to have been the source of the problem. Script was missing
-                #         some intersections. There might be something about deleting list items
-                #         while iterating over that list that I'm not understanding.
-                #       - Maybe instead of deleting worldStatPoints items, replace them with None,
-                #         and modify the loop to only work with non-None elements of worldStatPoints.
-                #
-                # Remove point, since it won't intersect with another facet at this level.
-                # Saves time and work.
-                # del worldStatPointsCopy[ptShadowIndex]
+                    # Set this point to None so we don't check it again, since it
+                    # won't intersect another facet at this level. Speeds script up.
+                    worldStatPoints[pI] = None
 
         sys.stdout.write("\r")
-        prcnt = ((facetShadowIndex + 1) * 100) / facetCount
+        prcnt    = ((facetShadowIndex + 1) * 100) / len(orig_Layer)
         prcntRnd = round(prcnt, 1)
-        sys.stdout.write("Progress: " + str(facetShadowIndex + 1) + " of " + str(facetCount) + " facets, {}%".format(str(prcntRnd)))
-
+        sys.stdout.write("Progress: " + str(facetShadowIndex + 1) + " of " + str(len(orig_Layer)) + " facets, {}%".format(str(prcntRnd)))
         facetShadowIndex += 1
 
     # Prepare output file.
@@ -203,9 +187,10 @@ def main():
     sRef.ImportFromWkt(wktCoordSys)
     driver = ogr.GetDriverByName('GeoJSON')
     dst_ds = driver.CreateDataSource(outFile)
-    fName = os.path.splitext(os.path.split(outFile)[1])[0]
-    dst_layer = dst_ds.CreateLayer(fName, sRef, geom_type=ogr.wkbPolygon)
+    fName  = os.path.splitext(os.path.split(outFile)[1])[0]
+    dst_layer  = dst_ds.CreateLayer(fName, sRef, geom_type=ogr.wkbPolygon)
     layer_defn = dst_layer.GetLayerDefn()
+    #
     idFieldName       = 'QTMID'
     countFieldName    = 'PointCount'
     sumFieldName      = 'Sum'
@@ -255,8 +240,8 @@ def main():
 
         if createOutputFacet:
 
-            feature = ogr.Feature(layer_defn)
-            thisGeom = feat.GetGeometryRef()
+            feature     = ogr.Feature(layer_defn)
+            thisGeom    = feat.GetGeometryRef()
             thisGeomWKT = thisGeom.ExportToWkt()
 
             # Stats calculations
@@ -314,6 +299,10 @@ def main():
     print("There were {} input points and {} intersections found overall.".format(str(totalPointCount), str(synopticIntersectionTotal)))
     print("There were {} input facets, and {} facets were found to have intersections with points.".format(str(facetCount), str(intersectedFacetsCount)))
     print("The output file contains {} facets.".format(str(outFacetCount)))
+
+    endTime = datetime.datetime.now()
+    elapsed = endTime - startTime
+    print("Total time taken: " + str(elapsed))
 
 if __name__ == '__main__':
     main()
