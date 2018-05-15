@@ -7,6 +7,7 @@ package gov.nasa.worldwindx.examples;
 
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.*;
+import gov.nasa.worldwind.render.Polygon;
 import gov.nasa.worldwindx.examples.util.RandomShapeAttributes;
 import gov.nasa.worldwind.exception.WWRuntimeException;
 import gov.nasa.worldwind.formats.geojson.*;
@@ -15,6 +16,7 @@ import gov.nasa.worldwind.layers.*;
 import gov.nasa.worldwind.render.*;
 import gov.nasa.worldwind.util.*;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.logging.Level;
 
@@ -455,6 +457,10 @@ public class GeoJSONLoader
             attrs = randomAttrs.nextAttributes().asShapeAttributes();
             layer.setValue(key, attrs);
         }
+
+        attrs.setOutlineMaterial(new Material(Color.WHITE));
+        // attrs.setInteriorMaterial(new Material(Color.GREEN));
+        attrs.setInteriorOpacity(0.0);
 
         return attrs;
     }

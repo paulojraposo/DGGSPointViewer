@@ -64,7 +64,8 @@ public class App {
     public void loadGeoJSON(){
         // TODO: Stub, develop me into something useful and dynamic!
         GeoJSONLoader gjLoader = new GeoJSONLoader();
-        Layer lyr = gjLoader.createLayerFromSource("out/production/DGGSPointViewer/resources/qtmlevels/qtmlvl4.geojson");
+        Layer lyr = gjLoader.createLayerFromSource("out/resources/qtmlevels/qtmlvl4.geojson");
+        lyr.setOpacity(0.9);
         // TODO: modify layer symbology for adding?
         this.aF.getWwd().getModel().getLayers().add(lyr);
     }
