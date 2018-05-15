@@ -54,7 +54,7 @@ public class MainAppPanel extends JPanel{
         // UT Logo
         logoPanel = new JPanel();
         logoLabel = new JLabel();
-        logoLabel.setIcon(new ImageIcon("out/production/DGGSPointViewer/resources/UTGeog.png"));
+        logoLabel.setIcon(new ImageIcon("out/resources/UTGeog.png"));
         logoLabel.setVisible(true);
         logoPanel.add(logoLabel);
         this.add(logoPanel);
