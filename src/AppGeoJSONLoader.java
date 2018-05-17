@@ -3,7 +3,7 @@
  * National Aeronautics and Space Administration.
  * All Rights Reserved.
  */
-package gov.nasa.worldwindx.examples;
+//package gov.nasa.worldwindx.examples;
 
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.*;
@@ -24,14 +24,14 @@ import java.util.logging.Level;
  * Utility class to load data from a GeoJSON source into a layer.
  *
  * @author dcollins
- * @version $Id: GeoJSONLoader.java 2326 2014-09-17 22:35:45Z dcollins $
+ * @version $Id: AppGeoJSONLoader.java 2326 2014-09-17 22:35:45Z dcollins $
  */
-public class GeoJSONLoader
+public class AppGeoJSONLoader
 {
     protected static final RandomShapeAttributes randomAttrs = new RandomShapeAttributes();
 
     /** Create a new loader. */
-    public GeoJSONLoader()
+    public AppGeoJSONLoader()
     {
     }
 

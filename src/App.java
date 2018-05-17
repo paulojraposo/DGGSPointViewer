@@ -63,7 +63,7 @@ public class App {
 
     public void loadGeoJSON(){
         // TODO: Stub, develop me into something useful and dynamic!
-        GeoJSONLoader gjLoader = new GeoJSONLoader();
+        AppGeoJSONLoader gjLoader = new AppGeoJSONLoader();
         Layer lyr = gjLoader.createLayerFromSource("out/resources/qtmlevels/qtmlvl4.geojson");
         lyr.setOpacity(0.9);
         // TODO: modify layer symbology for adding?
