@@ -138,7 +138,7 @@ public class MainAppPanel extends JPanel{
         maupPanel.setLayout(new GridLayout(2,2));
         levelLabel = new JLabel("<html><b>Scaling:</b> QTM level to draw:</html>");
         maupPanel.add(levelLabel);
-        levelSlider = new JSlider(0, maxQTMLevels, 6);
+        levelSlider = new JSlider(0, maxQTMLevels, Main.app.defaultQTMLevel);
         levelSlider.setMajorTickSpacing(2);
         levelSlider.setMinorTickSpacing(1);
         levelSlider.setPaintTicks(true);
@@ -146,7 +146,7 @@ public class MainAppPanel extends JPanel{
         levelSlider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                System.out.println("level slider moved"); // TODO: write useful method here.
+                Main.app.setCurrentQTMDrawingLevel(levelSlider.getValue());
             }
         });
         maupPanel.add(levelSlider);
@@ -160,7 +160,7 @@ public class MainAppPanel extends JPanel{
         EWTranslateSlider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                System.out.println("longitude slider moved"); // TODO: write useful method here.
+                Main.app.setCurrentLonShift(EWTranslateSlider.getValue());
             }
         });
         maupPanel.add(EWTranslateSlider);
@@ -174,7 +174,7 @@ public class MainAppPanel extends JPanel{
         classingAndMappingPanel.setLayout(binningPanelLayout);
         quantilesLabel = new JLabel("Quantiles:");
         classingAndMappingPanel.add(quantilesLabel);
-        quantilesSlider = new JSlider(2, 8, 5);
+        quantilesSlider = new JSlider(2, 8, Main.app.defaultQuantileCount);
         quantilesSlider.setMajorTickSpacing(1);
         quantilesSlider.setMinorTickSpacing(1);
         quantilesSlider.setPaintTicks(true);
@@ -182,7 +182,7 @@ public class MainAppPanel extends JPanel{
         quantilesSlider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                System.out.println("quantiles slider moved"); // TODO: write useful method here.
+                Main.app.setCurrentlySelectedQuantileCount(quantilesSlider.getValue());
             }
         });
         classingAndMappingPanel.add(quantilesSlider);

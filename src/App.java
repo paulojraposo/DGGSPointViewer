@@ -1,7 +1,6 @@
 import com.Ostermiller.util.CSVParser;
 import com.Ostermiller.util.LabeledCSVParser;
 import gov.nasa.worldwind.layers.Layer;
-import gov.nasa.worldwindx.examples.GeoJSONLoader;
 
 import javax.swing.*;
 import java.io.File;
@@ -30,6 +29,15 @@ public class App {
     // longitudinal shift.
     public HashMap<Integer,HashMap> intersectionLevelHM;
 
+    public int defaultQTMLevel = 6;
+    public int defaultQuantileCount = 5;
+    public int defaultLonShift = 0;
+
+    private Integer currentlySelectedLonShift = defaultLonShift;
+    private int currentlySelectedQTMLevel = defaultQTMLevel;
+    private int currentlySelectedQuantileCount = defaultQuantileCount;
+
+
     public App(){
 
     }
@@ -38,6 +46,27 @@ public class App {
         this.mGUI = new MainGUI();
         this.aF = this.mGUI.start("Point Stats on a Discrete Global Grid", MainGUI.AppFrame.class);
         this.loadGeoJSON();
+    }
+
+    public void triggerRedraw(){
+        // TODO: make me something meaningful! Just a dummy as yet.
+        System.out.printf("triggerRedraw() called. QTMlvl %s, LonShift %s, qCount %s\n", String.valueOf(currentlySelectedQTMLevel), String.valueOf(currentlySelectedLonShift), String.valueOf(currentlySelectedQuantileCount));
+    }
+
+    public void setCurrentQTMDrawingLevel(Integer lvl){
+        this.currentlySelectedQTMLevel = lvl;
+        triggerRedraw();
+    }
+
+    public void setCurrentLonShift(Integer lShift){
+        this.currentlySelectedLonShift = lShift;
+        triggerRedraw();
+
+    }
+
+    public void setCurrentlySelectedQuantileCount(Integer qCount){
+        this.currentlySelectedQuantileCount = qCount;
+        triggerRedraw();
     }
 
     public void setMaxBinningLevel(Integer lvl){
@@ -123,22 +152,6 @@ public class App {
         plotCSVPoints(); // just for testing and for show right now.
 
     }
-        private void readCSV(String filePath){
-        pointDataTriplets = new ArrayList<>();
-        InputStream iS = null;
-        try {
-            // Can iteratively get values this way, providing the field name:
-            while (csvParser.getLine() != null) {
-                String popS = csvParser.getValueByLabel("pop");
-                String latS = csvParser.getValueByLabel("latitude");
-                String lonS = csvParser.getValueByLabel("longitude");
-                String[] thisRow = {latS, lonS, popS};
-                System.out.println(thisRow[0] + "|" + thisRow[1] + "|" + thisRow[2]);
-                pointDataTriplets.add(thisRow);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+
 
 }
