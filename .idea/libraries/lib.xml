@@ -9,8 +9,8 @@
       <root url="jar://$PROJECT_DIR$/lib/ostermillerutils-1.08.02.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/gluegen-rt-natives-windows-i586.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/gluegen-rt-natives-linux-amd64.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/jogl-all-natives-windows-i586.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/gluegen-rt-natives-linux-i586.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/jogl-all-natives-windows-i586.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/worldwind.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/gdal.jar!/" />
       <root url="jar://$PROJECT_DIR$/lib/gluegen-rt-natives-windows-amd64.jar!/" />

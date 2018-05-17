@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/DGGSPointViewer.iml" filepath="$PROJECT_DIR$/DGGSPointViewer.iml" />
       <module fileurl="file://$PROJECT_DIR$/DGGSViewer.iml" filepath="$PROJECT_DIR$/DGGSViewer.iml" />
     </modules>
   </component>
