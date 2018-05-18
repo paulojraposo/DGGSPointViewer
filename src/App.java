@@ -31,11 +31,14 @@ public class App {
     public HashMap<Integer,HashMap> intersectionLevelHM;
 
     public int maxQTMLevels = 6;
-    public int maximumTranslationDegrees = 9; // absolute value, -9 to 9.
-
     public int defaultQTMLevel = 4;
-    public int defaultQuantileCount = 5;
+
+    public int maximumTranslationDegrees = 9; // absolute value, -9 to 9.
     public int defaultLonShift = 0;
+
+    public int minQuantiles = 3;
+    public int maxQuantiles = 7;
+    public int defaultQuantileCount = 5;
 
     private Integer currentlySelectedLonShift = defaultLonShift;
     private int currentlySelectedQTMLevel = defaultQTMLevel;
@@ -44,6 +47,11 @@ public class App {
     private String qtmLayerName = "QTM";
 
     public Boolean hasBinned = false;
+
+    public String orangesName = "oranges";
+    public String purplesName = "purples";
+
+    public String colorRampChosen = orangesName;
 
 
     public App(){
@@ -65,6 +73,10 @@ public class App {
         }else {
             loadBlankGeoJSON();
         }
+    }
+
+    public void setColorRampChosen(String colorRampName){
+        this.colorRampChosen = colorRampName;
     }
 
     public void setCurrentQTMDrawingLevel(Integer lvl){

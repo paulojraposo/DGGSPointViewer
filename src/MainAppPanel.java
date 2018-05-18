@@ -7,6 +7,7 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
 
 public class MainAppPanel extends JPanel{
 
@@ -43,6 +44,10 @@ public class MainAppPanel extends JPanel{
     JComboBox<String> colorCB;
     JLabel quantilesLabel;
     JSlider quantilesSlider;
+    JPanel colorRadioButtonsPanel;
+    JRadioButton orangesRB;
+    JRadioButton purplesRB;
+    ButtonGroup colorsBG;
 
 
     public MainAppPanel(){
@@ -169,11 +174,11 @@ public class MainAppPanel extends JPanel{
         classingAndMappingPanel = new JPanel();
         bClassificationTitled = BorderFactory.createTitledBorder(bGreyLine, "Choropleth Classification", TitledBorder.LEFT, TitledBorder.TOP, null, Color.black);
         classingAndMappingPanel.setBorder(bClassificationTitled);
-        GridLayout binningPanelLayout = new GridLayout(1,2); // TODO: revise x by y as needed for new elements.
+        GridLayout binningPanelLayout = new GridLayout(2,2);
         classingAndMappingPanel.setLayout(binningPanelLayout);
         quantilesLabel = new JLabel("Quantiles:");
         classingAndMappingPanel.add(quantilesLabel);
-        quantilesSlider = new JSlider(2, 8, Main.app.defaultQuantileCount);
+        quantilesSlider = new JSlider(Main.app.minQuantiles, Main.app.maxQuantiles, Main.app.defaultQuantileCount);
         quantilesSlider.setMajorTickSpacing(1);
         quantilesSlider.setMinorTickSpacing(1);
         quantilesSlider.setPaintTicks(true);
@@ -185,16 +190,33 @@ public class MainAppPanel extends JPanel{
             }
         });
         classingAndMappingPanel.add(quantilesSlider);
+        colorLabel = new JLabel("Color ramp:");
+        classingAndMappingPanel.add(colorLabel);
+        colorRadioButtonsPanel = new JPanel();
+        colorRadioButtonsPanel.setLayout(new BoxLayout(colorRadioButtonsPanel, BoxLayout.LINE_AXIS));
+        orangesRB = new JRadioButton(Main.app.orangesName);
+        orangesRB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                Main.app.setColorRampChosen(Main.app.orangesName);
+            }
+        });
+        purplesRB = new JRadioButton(Main.app.purplesName);
+        purplesRB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                Main.app.setColorRampChosen(Main.app.purplesName);
+            }
+        });
+        ButtonGroup colorRBGroup = new ButtonGroup();
+        colorRBGroup.add(orangesRB);
+        colorRBGroup.add(purplesRB);
+        orangesRB.setSelected(true);
+        colorRadioButtonsPanel.add(orangesRB);
+        colorRadioButtonsPanel.add(Box.createRigidArea(new Dimension(7,0)));
+        colorRadioButtonsPanel.add(purplesRB);
+        classingAndMappingPanel.add(colorRadioButtonsPanel);
         this.add(classingAndMappingPanel);
-
-//        colorLabel = new JLabel("Color ramp:");
-//        mappingParameterPanel.add(colorLabel);
-//        colorCB = new JComboBox<>(tempColorRampsForTesting);
-//        mappingParameterPanel.add(colorCB);
-
-//        drawMapButton = new JButton("Draw Map");
-//        drawMapButton.setHorizontalTextPosition(SwingConstants.LEADING);
-//        drawMapButton.setEnabled(false);
 
         // TODO: add legend.
 
