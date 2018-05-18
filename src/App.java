@@ -1,6 +1,7 @@
 import com.Ostermiller.util.CSVParser;
 import com.Ostermiller.util.LabeledCSVParser;
 import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.layers.LayerList;
 
 import javax.swing.*;
 import java.io.File;
@@ -18,7 +19,7 @@ public class App {
     private static ArrayList<String[]> pointDataTriplets;
     private MainGUI.AppFrame aF;
     private String[] csvFieldNames;
-    private int maximumTranslationDegrees = 9; // absolute value, -9 to 9.
+
     private int maxBinningLevel = 11; // 11 by default, user-changeable.
     private String attrToBin;
     public String[] levelOptions = new String[]{"1", "2", "3", "4", "5", "6", "7",
@@ -29,13 +30,20 @@ public class App {
     // longitudinal shift.
     public HashMap<Integer,HashMap> intersectionLevelHM;
 
-    public int defaultQTMLevel = 6;
+    public int maxQTMLevels = 6;
+    public int maximumTranslationDegrees = 9; // absolute value, -9 to 9.
+
+    public int defaultQTMLevel = 4;
     public int defaultQuantileCount = 5;
     public int defaultLonShift = 0;
 
     private Integer currentlySelectedLonShift = defaultLonShift;
     private int currentlySelectedQTMLevel = defaultQTMLevel;
     private int currentlySelectedQuantileCount = defaultQuantileCount;
+
+    private String qtmLayerName = "QTM";
+
+    public Boolean hasBinned = false;
 
 
     public App(){
@@ -45,12 +53,18 @@ public class App {
     public void initialize(){
         this.mGUI = new MainGUI();
         this.aF = this.mGUI.start("Point Stats on a Discrete Global Grid", MainGUI.AppFrame.class);
-        this.loadGeoJSON();
+        this.loadBlankGeoJSON();
     }
 
     public void triggerRedraw(){
-        // TODO: make me something meaningful! Just a dummy as yet.
-        System.out.printf("triggerRedraw() called. QTMlvl %s, LonShift %s, qCount %s\n", String.valueOf(currentlySelectedQTMLevel), String.valueOf(currentlySelectedLonShift), String.valueOf(currentlySelectedQuantileCount));
+        // Remove the previous QTM layer and use the relevant GeoJSON loading method,
+        // based on whether the user has binned yet.
+        removeQTMLayer();
+        if (hasBinned == true){
+            loadChoroplethGeoJSON();
+        }else {
+            loadBlankGeoJSON();
+        }
     }
 
     public void setCurrentQTMDrawingLevel(Integer lvl){
@@ -90,13 +104,27 @@ public class App {
         this.parseCSV(this.userCSVFilePath);
     }
 
-    public void loadGeoJSON(){
-        // TODO: Stub, develop me into something useful and dynamic!
+    public void removeQTMLayer(){
+        LayerList ll = this.aF.getWwd().getModel().getLayers();
+        for (Layer l: ll){
+            if (l.getName() == "QTM"){
+                this.aF.getWwd().getModel().getLayers().remove(l);
+            }
+        }
+    }
+
+    public void loadBlankGeoJSON(){
         AppGeoJSONLoader gjLoader = new AppGeoJSONLoader();
-        Layer lyr = gjLoader.createLayerFromSource("out/resources/qtmlevels/qtmlvl4.geojson");
-        lyr.setOpacity(0.9);
-        // TODO: modify layer symbology for adding?
+        String qtmResourceFilePath = String.format("out/resources/qtmlevels/qtmlvl%s.geojson", String.valueOf(Main.app.currentlySelectedQTMLevel));
+        Layer lyr = gjLoader.createLayerFromSource(qtmResourceFilePath);
+        // lyr.setOpacity(0.9);
+        lyr.setName(qtmLayerName);
         this.aF.getWwd().getModel().getLayers().add(lyr);
+    }
+
+    public void loadChoroplethGeoJSON(){
+        // TODO: write me!
+        System.out.println("Would be loading data-filled choropleth GeoJSON here.");
     }
 
     public InputStream pathToInputStream(String path) throws IOException {
@@ -150,6 +178,10 @@ public class App {
         System.out.println("Would be binning here.");
 
         plotCSVPoints(); // just for testing and for show right now.
+
+        // Change hasBinned to true, to change what we draw for GeoJSON polygons.
+        hasBinned = true;
+        this.aF.mainAppPanel.binningButton.setText("Done binning.");
 
     }
 

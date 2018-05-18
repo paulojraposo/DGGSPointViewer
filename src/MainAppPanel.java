@@ -11,7 +11,6 @@ import java.awt.event.ActionListener;
 public class MainAppPanel extends JPanel{
 
     public JFileChooser fc;
-    int maxQTMLevels = 12;
 
     Border bGreyLine = BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1, true);
     Border bBinningTitled;
@@ -138,7 +137,7 @@ public class MainAppPanel extends JPanel{
         maupPanel.setLayout(new GridLayout(2,2));
         levelLabel = new JLabel("<html><b>Scaling:</b> QTM level to draw:</html>");
         maupPanel.add(levelLabel);
-        levelSlider = new JSlider(0, maxQTMLevels, Main.app.defaultQTMLevel);
+        levelSlider = new JSlider(0, Main.app.maxQTMLevels, Main.app.defaultQTMLevel);
         levelSlider.setMajorTickSpacing(2);
         levelSlider.setMinorTickSpacing(1);
         levelSlider.setPaintTicks(true);
