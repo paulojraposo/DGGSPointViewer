@@ -157,7 +157,7 @@ public class MainAppPanel extends JPanel{
         EWTranslateLabel = new JLabel("<html><b>Zoning:</b> Longitudinal shift<br>of mesh in degrees:</html>");
         maupPanel.add(EWTranslateLabel);
         EWTranslateSlider = new JSlider(-1*Main.app.getMaxTranslationDegrees(), Main.app.getMaxTranslationDegrees(), 0);
-        EWTranslateSlider.setMajorTickSpacing(3);
+        EWTranslateSlider.setMajorTickSpacing(2);
         EWTranslateSlider.setMinorTickSpacing(1);
         EWTranslateSlider.setPaintTicks(true);
         EWTranslateSlider.setPaintLabels(true);

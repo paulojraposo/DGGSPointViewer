@@ -20,10 +20,13 @@ public class App {
     private MainGUI.AppFrame aF;
     private String[] csvFieldNames;
 
-    private int maxBinningLevel = 11; // 11 by default, user-changeable.
-    private String attrToBin;
-    public String[] levelOptions = new String[]{"1", "2", "3", "4", "5", "6", "7",
-            "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"};
+    String attrToBin;
+
+    // Limited maxBinningLevel to 7, down from 11, 2018-05-18, for performance's sake, for now.
+    private int maxBinningLevel = 6; // 7th level's index, by default, user-changeable.
+    public String[] levelOptions = new String[]{"1", "2", "3", "4", "5", "6", "7"};//,
+            //"8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"};
+
     // To keep track of intersected QTM facets with binned data,
     // we keep a hashmap of hashmaps. The first hashmap is keyed
     // by QTM level, and those it returns to be keyed by
@@ -33,7 +36,7 @@ public class App {
     public int maxQTMLevels = 6;
     public int defaultQTMLevel = 4;
 
-    public int maximumTranslationDegrees = 9; // absolute value, -9 to 9.
+    public int maximumTranslationDegrees = 5; // absolute value, -5 to 5.
     public int defaultLonShift = 0;
 
     public int minQuantiles = 3;
