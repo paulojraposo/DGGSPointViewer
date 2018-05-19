@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# Randall Brown
-# May 9th, 2018
+# Randall Brown & Paulo Raposo
+# May 2018
 
 #   .-.                              _____                                  __
 #   /v\    L   I   N   U   X       / ____/__   ___   ___   ____ ___  ____  / /_  __  __
@@ -12,6 +12,14 @@
 
 # Simple script that takes in a QTM file and shifts the longitude of the file by a user defined amount.
 
+# NB: To avoid a problem in WorldWind (which is where the products of this script are presently meant
+# to be used) with having longitudes beyond -180 and 180 degrees, we are clipping the final geometries
+# by the 'equirectangular' limits of the lat/lon coordinate system. This means we truncate polygons
+# that cross the -180/180 longitude line. Also, we do not currently re-insert the cut-off parts on the
+# opposite side of the map.
+# TODO: reinsert the cut-off parts of polys at the opposite side of the map.
+
+
 # TODO: Find a way to pull the driver directly from the filetype so it works for more than just GeoJSON files.
 
 # Imports ///////////////////////////////////////////////////////////////////////////
@@ -20,6 +28,17 @@ import os, argparse
 from osgeo import ogr, gdal, osr
 from qtmgenerator import constructGeometry
 gdal.UseExceptions()
+
+# Constants /////////////////////////////////////////////////////////////////////////
+
+earthLimitsRing = ogr.Geometry(ogr.wkbLinearRing)
+earthLimitsRing.AddPoint(-180.0, -90.0) # sequence: lon, lat (x,y)
+earthLimitsRing.AddPoint( 180.0, -90.0) # sequence: lon, lat (x,y)
+earthLimitsRing.AddPoint( 180.0,  90.0) # sequence: lon, lat (x,y)
+earthLimitsRing.AddPoint(-180.0,  90.0) # sequence: lon, lat (x,y)
+earthLimitsRing.AddPoint(-180.0, -90.0) # sequence: lon, lat (x,y)
+earthLimitsPolygon = ogr.Geometry(ogr.wkbPolygon)
+earthLimitsPolygon.AddGeometry(earthLimitsRing)
 
 # Script ////////////////////////////////////////////////////////////////////////////////
 
@@ -108,7 +127,11 @@ def main():
         feature = ogr.Feature(layer_defn)
         feature.SetField('QTMID', idList[iterator])
         facetGeometry = constructGeometry(f)
-        feature.SetGeometry(facetGeometry)
+        # Before creating them, intersect them with earthLimitsPolygon to ensure
+        # we don't create features beyond the allowable lat/lon coords.
+        facetGeometryWithinBounds = facetGeometry.Intersection(earthLimitsPolygon)
+        feature.SetGeometry(facetGeometryWithinBounds)
+        # feature.SetGeometry(facetGeometry)
         dst_layer.CreateFeature(feature)
         iterator = iterator + 1
         feature.Destroy()  # Destroy the feature to free resources.
