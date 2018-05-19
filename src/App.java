@@ -35,16 +35,15 @@ public class App {
 
     public int maxQTMLevels = 6;
     public int defaultQTMLevel = 4;
+    private int currentlySelectedQTMLevel = defaultQTMLevel;
 
-    public int maximumTranslationDegrees = 5; // absolute value, -5 to 5.
-    public int defaultLonShift = 0;
+    public Integer maximumLonShift = 5; // absolute value, -5 to 5.
+    public Integer defaultLonShift = 0;
+    private Integer currentlySelectedLonShift = defaultLonShift;
 
     public int minQuantiles = 3;
     public int maxQuantiles = 7;
     public int defaultQuantileCount = 5;
-
-    private Integer currentlySelectedLonShift = defaultLonShift;
-    private int currentlySelectedQTMLevel = defaultQTMLevel;
     private int currentlySelectedQuantileCount = defaultQuantileCount;
 
     private String qtmLayerName = "QTM";
@@ -107,7 +106,7 @@ public class App {
     }
 
     public Integer getMaxTranslationDegrees(){
-        return maximumTranslationDegrees;
+        return maximumLonShift;
     }
 
     public void setAttrToBin(String attribute){
