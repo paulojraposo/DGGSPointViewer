@@ -37,7 +37,8 @@ public class App {
     public int defaultQTMLevel = 4;
     private int currentlySelectedQTMLevel = defaultQTMLevel;
 
-    public Integer maximumLonShift = 5; // absolute value, -5 to 5.
+    public Integer maximumLonShift = 5;
+    public Integer minimumLonShift = maximumLonShift * -1;
     public Integer defaultLonShift = 0;
     private Integer currentlySelectedLonShift = defaultLonShift;
 
@@ -89,7 +90,6 @@ public class App {
     public void setCurrentLonShift(Integer lShift){
         this.currentlySelectedLonShift = lShift;
         triggerRedraw();
-
     }
 
     public void setCurrentlySelectedQuantileCount(Integer qCount){
@@ -129,9 +129,25 @@ public class App {
 
     public void loadBlankGeoJSON(){
         AppGeoJSONLoader gjLoader = new AppGeoJSONLoader();
-        String qtmResourceFilePath = String.format("out/resources/qtmlevels/qtmlvl%s.geojson", String.valueOf(Main.app.currentlySelectedQTMLevel));
+        /*
+        Below, we retrieve saved QTM geojson files, which have a fixed naming
+        convention as produced by qtmshifter.py. The string formatting below
+        does the necessary work to identify the right file, given current
+        values for QTM level and longitudinal shift.
+        TODO: Put this into its own method; we'll need essentially the same logic when loading binned data layers.
+         */
+        Integer lonShiftAbsVal = Math.abs(this.currentlySelectedLonShift);
+        String positiveOrNegative = "p";
+        if (this.currentlySelectedLonShift < 0.0){
+            positiveOrNegative = "n";
+        }
+        String qtmResourceFilePath = String.format("out/resources/qtmlevels/qtmlvl%s_lon%s%s.geojson",
+                String.valueOf(this.currentlySelectedQTMLevel),
+                positiveOrNegative,
+                String.valueOf(Math.abs(this.currentlySelectedLonShift)) + ".0"
+                );
+        System.out.println(qtmResourceFilePath);
         Layer lyr = gjLoader.createLayerFromSource(qtmResourceFilePath);
-        // lyr.setOpacity(0.9);
         lyr.setName(qtmLayerName);
         this.aF.getWwd().getModel().getLayers().add(lyr);
     }
