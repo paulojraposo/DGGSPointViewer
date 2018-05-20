@@ -41,13 +41,18 @@ public class MainAppPanel extends JPanel{
     // Classification and Mapping panel
     JPanel classingAndMappingPanel;
     JLabel colorLabel;
-    JComboBox<String> colorCB;
+    // JComboBox colorCB;
+    // ImageIcon[] colorOptions = {
+    //        new ImageIcon("out/resources/orangesthumbnail.png"),
+    //        new ImageIcon("out/resources/purplesthumbnail.png")
+    //        };
     JLabel quantilesLabel;
     JSlider quantilesSlider;
     JPanel colorRadioButtonsPanel;
     JRadioButton orangesRB;
     JRadioButton purplesRB;
-    ButtonGroup colorsBG;
+    ButtonGroup colorRBGroup;
+
 
 
     public MainAppPanel(){
@@ -140,7 +145,7 @@ public class MainAppPanel extends JPanel{
         bMAUPTitled = BorderFactory.createTitledBorder(bGreyLine, "Modifiable Areal Units", TitledBorder.LEFT,  TitledBorder.TOP, null, Color.black);
         maupPanel.setBorder(bMAUPTitled);
         maupPanel.setLayout(new GridLayout(2,2));
-        levelLabel = new JLabel("<html><b>Scaling:</b> QTM level to draw:</html>");
+        levelLabel = new JLabel("<html><b>Scaling</b> (QTM level to draw):</html>");
         maupPanel.add(levelLabel);
         levelSlider = new JSlider(0, Main.app.maxQTMLevels, Main.app.defaultQTMLevel);
         levelSlider.setMajorTickSpacing(2);
@@ -154,7 +159,7 @@ public class MainAppPanel extends JPanel{
             }
         });
         maupPanel.add(levelSlider);
-        EWTranslateLabel = new JLabel("<html><b>Zoning:</b> Longitudinal shift<br>of mesh in degrees:</html>");
+        EWTranslateLabel = new JLabel("<html><b>Zoning</b> (longitudinal shift<br>of mesh in degrees):</html>");
         maupPanel.add(EWTranslateLabel);
         EWTranslateSlider = new JSlider(Main.app.minimumLonShift, Main.app.maximumLonShift, Main.app.defaultLonShift);
         EWTranslateSlider.setMajorTickSpacing(2);
@@ -208,7 +213,7 @@ public class MainAppPanel extends JPanel{
                 Main.app.setColorRampChosen(Main.app.purplesName);
             }
         });
-        ButtonGroup colorRBGroup = new ButtonGroup();
+        colorRBGroup = new ButtonGroup();
         colorRBGroup.add(orangesRB);
         colorRBGroup.add(purplesRB);
         orangesRB.setSelected(true);
