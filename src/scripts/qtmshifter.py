@@ -128,12 +128,21 @@ def main():
         feature.SetField('QTMID', idList[iterator])
         facetGeometry = constructGeometry(f)
         # Before creating them, intersect them with earthLimitsPolygon to ensure
-        # we don't create features beyond the allowable lat/lon coords.
+        # we don't create features beyond the allowable lat/lon coords. Also
+        # ensure there's actually some geometry there; if not, don't write
+        # this feature to file.
         facetGeometryWithinBounds = facetGeometry.Intersection(earthLimitsPolygon)
-        feature.SetGeometry(facetGeometryWithinBounds)
-        # feature.SetGeometry(facetGeometry)
-        dst_layer.CreateFeature(feature)
-        iterator = iterator + 1
+        # Below, there should be a non-zero count to the intersection geometry.
+        # Also, it seems a no-polygon intersection result is of type "GeometryCollection",
+        # so could possibly use
+        #   facetGeometryWithinBounds.GetGeometryName() != "GeometryCollection"
+        #   or
+        #   facetGeometryWithinBounds.GetGeometryName() == "Polygon"
+        # as a condition too.
+        if facetGeometryWithinBounds.GetGeometryCount():
+            feature.SetGeometry(facetGeometryWithinBounds)
+            dst_layer.CreateFeature(feature)
+        iterator = iterator + 1 # Iterate whether or not we write a feature, to keep sync.
         feature.Destroy()  # Destroy the feature to free resources.
 
     dst_ds.Destroy()  # Destroy the data source to free resouces.

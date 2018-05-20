@@ -146,7 +146,7 @@ public class App {
                 positiveOrNegative,
                 String.valueOf(Math.abs(this.currentlySelectedLonShift)) + ".0"
                 );
-        System.out.println(qtmResourceFilePath);
+        // System.out.println(qtmResourceFilePath);
         Layer lyr = gjLoader.createLayerFromSource(qtmResourceFilePath);
         lyr.setName(qtmLayerName);
         this.aF.getWwd().getModel().getLayers().add(lyr);
