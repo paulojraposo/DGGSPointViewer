@@ -1,3 +1,4 @@
 .idea/workspace.xml
 out/
 DGGSViewer.iml
+src/scripts/__pycache__/
