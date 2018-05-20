@@ -49,6 +49,8 @@ public class App {
 
     private String qtmLayerName = "QTM";
 
+    public Boolean usingPreparedData = false;
+
     public Boolean hasBinned = false;
 
     public String orangesName = "oranges";
@@ -144,17 +146,21 @@ public class App {
         String qtmResourceFilePath = String.format("out/resources/qtmlevels/qtmlvl%s_lon%s%s.geojson",
                 String.valueOf(this.currentlySelectedQTMLevel),
                 positiveOrNegative,
-                String.valueOf(Math.abs(this.currentlySelectedLonShift)) + ".0"
+                String.valueOf(Math.abs(this.currentlySelectedLonShift)) + ".0" // Paste-on .0 since the Python script names its outputs using decimal numbers, not integers.
                 );
-        // System.out.println(qtmResourceFilePath);
         Layer lyr = gjLoader.createLayerFromSource(qtmResourceFilePath);
         lyr.setName(qtmLayerName);
         this.aF.getWwd().getModel().getLayers().add(lyr);
+        // Move QTM layer to the top
+        // this.aF.getWwd().getModel().getLayers().set(0,lyr);
     }
 
     public void loadChoroplethGeoJSON(){
         // TODO: write me!
         System.out.println("Would be loading data-filled choropleth GeoJSON here.");
+        if (this.usingPreparedData == true){
+            System.out.println("Would be loading prepared data here.");
+        }
     }
 
     public InputStream pathToInputStream(String path) throws IOException {
@@ -170,6 +176,15 @@ public class App {
     private void setAttrCBOptionsAndEnable(){
         DefaultComboBoxModel cbModel = new DefaultComboBoxModel(csvFieldNames);
         this.aF.mainAppPanel.attrToBinCB.setModel(cbModel);
+
+        // Using the built-in data, try setting the selection immediately to
+        if (this.usingPreparedData == true){
+            try {
+                this.aF.mainAppPanel.attrToBinCB.setSelectedItem("pop_max");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
         this.aF.mainAppPanel.attrToBinCB.setEnabled(true);
     }
 
@@ -192,6 +207,7 @@ public class App {
         MarkerLayerMaker mlm = new MarkerLayerMaker(csvParser);
         mlm.makeMarkers();
         Layer markerLayer = mlm.makeMarkerLayer();
+        markerLayer.setName("Data Points");
         this.aF.getWwd().getModel().getLayers().add(markerLayer);
     }
 
@@ -207,7 +223,7 @@ public class App {
 
         System.out.println("Would be binning here.");
 
-        plotCSVPoints(); // just for testing and for show right now.
+        plotCSVPoints();
 
         // Change hasBinned to true, to change what we draw for GeoJSON polygons.
         hasBinned = true;

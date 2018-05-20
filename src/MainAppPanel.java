@@ -7,7 +7,9 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.net.URL;
+import java.nio.file.Path;
 
 public class MainAppPanel extends JPanel{
 
@@ -23,6 +25,8 @@ public class MainAppPanel extends JPanel{
     // Binning panel
     JPanel binningPanel;
     JLabel chooseFileLabel;
+    JPanel dataLoadingButtonsPanel;
+    JButton usePrePreparedDataButton;
     JButton chooseFileButton;
     JLabel attrToBinLabel;
     JComboBox attrToBinCB;
@@ -75,7 +79,29 @@ public class MainAppPanel extends JPanel{
         binningPanel.setLayout(new GridLayout(4,2));
         chooseFileLabel = new JLabel("Input CSV:");
         binningPanel.add(chooseFileLabel);
-        chooseFileButton = new JButton("Choose File..."); // change button label when file chosen to indicate it to user.
+        dataLoadingButtonsPanel = new JPanel();
+        FlowLayout dataLoadingButtonsPanellayout = (FlowLayout)dataLoadingButtonsPanel.getLayout();
+        dataLoadingButtonsPanellayout.setVgap(0);
+        dataLoadingButtonsPanellayout.setHgap(0);
+        usePrePreparedDataButton = new JButton("Use built-in");
+        usePrePreparedDataButton.setToolTipText("Use included and prepared Natural Earth world populated places data.");
+        usePrePreparedDataButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Load the built-in dataset, make the choose file button unavailable,
+                // and set the main app Boolean usingPreparedData, which in turn
+                // signals to not actually perform binning, but use preloaded geojson
+                // files.
+                File preparedDataCSVFile = new File("out/resources/prepareddata/popplacesforapp.csv");
+                String prepreparedDataPathString = preparedDataCSVFile.toPath().toString();
+                Main.app.usingPreparedData = true;
+                Main.app.receiveUserCSVPath(prepreparedDataPathString);
+                disableAllBinningContols();
+                Main.app.performBinning();
+            }
+        });
+        dataLoadingButtonsPanel.add(usePrePreparedDataButton);
+        chooseFileButton = new JButton("Choose File...");
         chooseFileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -83,11 +109,12 @@ public class MainAppPanel extends JPanel{
                 fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 // TODO: make file chooser filter for CSV files.
                 int returnVal = fc.showOpenDialog(binningPanel);
-                chooseFileButton.setText(fc.getSelectedFile().getName());
+                chooseFileButton.setText(fc.getSelectedFile().getName()); // change button label when file chosen to indicate it to user.
                 Main.app.receiveUserCSVPath(fc.getSelectedFile().toPath().toString());
             }
         });
-        binningPanel.add(chooseFileButton);
+        dataLoadingButtonsPanel.add(chooseFileButton);
+        binningPanel.add(dataLoadingButtonsPanel);
         levelChoosingLabel = new JLabel("Bin up to QTM level:");
         binningPanel.add(levelChoosingLabel);
         levelIntersectionCalculationCB = new JComboBox<String>(Main.app.levelOptions);
@@ -115,10 +142,10 @@ public class MainAppPanel extends JPanel{
             }
         } );
         binningPanel.add(attrToBinCB);
-        progressMessage = new JLabel(""); // starts blank, and as a filler in the GridLayout. Will be updated later to show progress messages.
+        progressMessage = new JLabel(""); // Blank, as a filler in the GridLayout.
         progressMessage.setHorizontalAlignment(SwingConstants.RIGHT);
         binningPanel.add(progressMessage);
-        binningButton = new JButton("Run Binning");
+        binningButton = new JButton("Plot & Run Binning");
         binningButton.setEnabled(false); // Disabled until user selects a CSV.
         binningButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -130,10 +157,7 @@ public class MainAppPanel extends JPanel{
                 } catch (Exception ex) {
                     System.out.println(ex);
                 }
-                chooseFileButton.setEnabled(false);
-                levelIntersectionCalculationCB.setEnabled(false);
-                attrToBinCB.setEnabled(false);
-                binningButton.setEnabled(false);
+                disableAllBinningContols();
                 Main.app.performBinning();
             }
         } );
@@ -226,4 +250,13 @@ public class MainAppPanel extends JPanel{
         // TODO: add legend.
 
     }
+
+    public void disableAllBinningContols(){
+        this.usePrePreparedDataButton.setEnabled(false);
+        this.chooseFileButton.setEnabled(false);
+        this.levelIntersectionCalculationCB.setEnabled(false);
+        this.attrToBinCB.setEnabled(false);
+        this.binningButton.setEnabled(false);
+    }
+
 }
