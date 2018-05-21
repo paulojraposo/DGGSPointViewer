@@ -229,6 +229,8 @@ public class App {
         hasBinned = true;
         this.aF.mainAppPanel.binningButton.setText("Done binning.");
 
+        triggerRedraw();
+
     }
 
 
