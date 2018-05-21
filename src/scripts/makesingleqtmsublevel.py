@@ -33,6 +33,8 @@ typesAndDrivers = {
     ".gmt":     "GMT"
 }
 
+idFieldName = "QTMID"
+
 # Well-known text definition of World Geodetic System of 1984 (WGS 84). Taken from spatialreference.org.
 wgs84WKT = """GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]"""
 
@@ -43,7 +45,7 @@ def getDriverByFilepath(filePath):
     name, ext = os.path.splitext(filePath)
     try:
         driverName = typesAndDrivers[ext.lower()]
-        print(driverName)
+        # print(driverName)
         driver = ogr.GetDriverByName(driverName)
         return driver
     except:
@@ -119,7 +121,7 @@ def main():
     # Determine the level of the input facets from their ID values. Also ensure consistency of level.
     idLengths = []
     for feature in inLayer:
-        idLengths.append(len(str(feature.GetField('ID'))))
+        idLengths.append(len(str(feature.GetField(idFieldName))))
     inLayer.ResetReading()
     idLengthsSet = set(idLengths)
     if len(idLengthsSet) != 1:
@@ -134,7 +136,7 @@ def main():
     # we need to determine wether they're north-facing or not, using determineOrient().
     inFacets = []
     for feature in inLayer:
-        thisID = feature.GetField('ID')
+        thisID = feature.GetField(idFieldName)
         # print(thisID)
         thisGeom = feature.GetGeometryRef() # This will be a top-most POLYGON defn.
         # print(str(thisGeom)) # Casting to string gives the WKT for the polygon.
@@ -151,7 +153,7 @@ def main():
         thisFacet = []
         for v in theseVertices:
             thisFacet.append( ( v[1], v[0] ) )
-            print("coords are {} {}".format(str(v[1]), str(v[0])))
+            # print("coords are {} {}".format(str(v[1]), str(v[0])))
         if orient == "n":
             thisFacet.append(True)
         elif orient == "s":
@@ -169,7 +171,6 @@ def main():
     dst_ds = driver.CreateDataSource(outFile)
     fName = os.path.splitext(os.path.split(outFile)[1])[0]
     dst_layer = dst_ds.CreateLayer(fName, sRef, geom_type=ogr.wkbPolygon)
-    idFieldName = "ID"
     layer_defn = dst_layer.GetLayerDefn()
     new_field = ogr.FieldDefn(idFieldName, ogr.OFTString)
     dst_layer.CreateField(new_field)
