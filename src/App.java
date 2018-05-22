@@ -14,13 +14,14 @@ import java.util.HashMap;
 public class App {
 
     private MainGUI mGUI;
-    private static String userCSVFilePath;
+    private String userCSVFilePath;
     private static LabeledCSVParser csvParser;
     private static ArrayList<String[]> pointDataTriplets;
     private MainGUI.AppFrame aF;
     private String[] csvFieldNames;
 
     String attrToBin;
+    DefaultComboBoxModel cbModel;
 
     // Limited maxBinningLevel to 7, down from 11, 2018-05-18, for performance's sake, for now.
     private int maxBinningLevel = 6; // 7th level's index, by default, user-changeable.
@@ -48,6 +49,7 @@ public class App {
     private int currentlySelectedQuantileCount = defaultQuantileCount;
 
     private String qtmLayerName = "QTM";
+    private String dataPointsLayerName = "Data Points";
 
     public Boolean usingPreparedData = false;
 
@@ -123,7 +125,16 @@ public class App {
     public void removeQTMLayer(){
         LayerList ll = this.aF.getWwd().getModel().getLayers();
         for (Layer l: ll){
-            if (l.getName() == "QTM"){
+            if (l.getName() == this.qtmLayerName){
+                this.aF.getWwd().getModel().getLayers().remove(l);
+            }
+        }
+    }
+
+    public void removeDataPointsLayer(){
+        LayerList ll = this.aF.getWwd().getModel().getLayers();
+        for (Layer l: ll){
+            if (l.getName() == this.dataPointsLayerName){
                 this.aF.getWwd().getModel().getLayers().remove(l);
             }
         }
@@ -174,7 +185,7 @@ public class App {
     }
 
     private void setAttrCBOptionsAndEnable(){
-        DefaultComboBoxModel cbModel = new DefaultComboBoxModel(csvFieldNames);
+        cbModel = new DefaultComboBoxModel(csvFieldNames);
         this.aF.mainAppPanel.attrToBinCB.setModel(cbModel);
 
         // Using the built-in data, try setting the selection immediately to
@@ -207,7 +218,7 @@ public class App {
         MarkerLayerMaker mlm = new MarkerLayerMaker(csvParser);
         mlm.makeMarkers();
         Layer markerLayer = mlm.makeMarkerLayer();
-        markerLayer.setName("Data Points");
+        markerLayer.setName(dataPointsLayerName);
         this.aF.getWwd().getModel().getLayers().add(markerLayer);
     }
 
@@ -231,6 +242,19 @@ public class App {
 
         triggerRedraw();
 
+    }
+
+    public void resetAppState(){
+        // Reset things to the state the app is in when first started up.
+        removeQTMLayer();
+        removeDataPointsLayer();
+        csvFieldNames = null;
+        this.cbModel = new DefaultComboBoxModel(); // A new empty DefaultComboBoxModel.
+        this.userCSVFilePath = null;
+        usingPreparedData = false;
+        hasBinned = false;
+        aF.mainAppPanel.resetAllBinningControls();
+        triggerRedraw();
     }
 
 

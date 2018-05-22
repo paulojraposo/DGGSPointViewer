@@ -8,8 +8,6 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.net.URL;
-import java.nio.file.Path;
 
 public class MainAppPanel extends JPanel{
 
@@ -28,12 +26,14 @@ public class MainAppPanel extends JPanel{
     JLabel chooseFileLabel;
     JPanel dataLoadingButtonsPanel;
     JButton usePrePreparedDataButton;
+    String chooseFileButtonText = "Choose file";
     JButton chooseFileButton;
     JLabel attrToBinLabel;
     JComboBox attrToBinCB;
     JLabel levelChoosingLabel;
     JComboBox<String> levelIntersectionCalculationCB;
     JLabel progressMessage;
+    String binningButtonText = "Plot & Run Binning";
     JButton binningButton; // Change the text of this when processing to tell the user.
 
     // MAUP panel
@@ -102,12 +102,12 @@ public class MainAppPanel extends JPanel{
                 String prepreparedDataPathString = preparedDataCSVFile.toPath().toString();
                 Main.app.usingPreparedData = true;
                 Main.app.receiveUserCSVPath(prepreparedDataPathString);
-                disableAllBinningContols();
+                disableAllBinningControls();
                 Main.app.performBinning();
             }
         });
         dataLoadingButtonsPanel.add(usePrePreparedDataButton);
-        chooseFileButton = new JButton("Choose File...");
+        chooseFileButton = new JButton(this.chooseFileButtonText);
         chooseFileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -115,7 +115,9 @@ public class MainAppPanel extends JPanel{
                 fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
                 // TODO: make file chooser filter for CSV files.
                 int returnVal = fc.showOpenDialog(binningPanel);
-                chooseFileButton.setText(fc.getSelectedFile().getName()); // change button label when file chosen to indicate it to user.
+                // Below, use a truncated name so the button doesn't grow (much) in size.
+                chooseFileButton.setText(truncateString(fc.getSelectedFile().getName(), 8));
+                usePrePreparedDataButton.setEnabled(false);
                 Main.app.receiveUserCSVPath(fc.getSelectedFile().toPath().toString());
             }
         });
@@ -151,7 +153,7 @@ public class MainAppPanel extends JPanel{
         progressMessage = new JLabel(""); // Blank, as a filler in the GridLayout.
         progressMessage.setHorizontalAlignment(SwingConstants.RIGHT);
         binningPanel.add(progressMessage);
-        binningButton = new JButton("Plot & Run Binning");
+        binningButton = new JButton(binningButtonText);
         binningButton.setEnabled(false); // Disabled until user selects a CSV.
         binningButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -163,7 +165,7 @@ public class MainAppPanel extends JPanel{
                 } catch (Exception ex) {
                     System.out.println(ex);
                 }
-                disableAllBinningContols();
+                disableAllBinningControls();
                 Main.app.performBinning();
             }
         } );
@@ -264,19 +266,41 @@ public class MainAppPanel extends JPanel{
         clearAndResetLabel = new JLabel("");
         clearAndResetPanel.add(clearAndResetLabel);
         clearAndResetButton = new JButton("Clear & Reset App");
-        // TODO: add ActionListener to button and write method for resetting app.
+        clearAndResetButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Main.app.resetAppState();
+            }
+        } );
         clearAndResetPanel.add(clearAndResetButton);
         this.add(clearAndResetPanel);
-
-
     }
 
-    public void disableAllBinningContols(){
+    // Below from https://www.dotnetperls.com/truncate-java.
+    public static String truncateString(String value, int length) {
+        // Ensure String length is longer than requested size.
+        if (value.length() > length) {
+            return value.substring(0, length) + "...";
+        } else {
+            return value;
+        }
+    }
+    public void disableAllBinningControls(){
         this.usePrePreparedDataButton.setEnabled(false);
         this.chooseFileButton.setEnabled(false);
         this.levelIntersectionCalculationCB.setEnabled(false);
         this.attrToBinCB.setEnabled(false);
         this.binningButton.setEnabled(false);
+    }
+
+    public void resetAllBinningControls(){
+        this.usePrePreparedDataButton.setEnabled(true);
+        this.chooseFileButton.setText(this.chooseFileButtonText);
+        this.chooseFileButton.setEnabled(true);
+        this.levelIntersectionCalculationCB.setEnabled(true);
+        this.attrToBinCB.setModel(Main.app.cbModel);
+        this.attrToBinCB.setEnabled(false);
+        this.binningButton.setEnabled(false);
+        this.binningButton.setText(this.binningButtonText);
     }
 
 }
