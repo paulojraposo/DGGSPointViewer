@@ -19,6 +19,7 @@ public class MainAppPanel extends JPanel{
     Border bBinningTitled;
     Border bMAUPTitled;
     Border bClassificationTitled;
+    Border bClearAndReset;
     JPanel logoPanel;
     JLabel logoLabel;
 
@@ -56,6 +57,11 @@ public class MainAppPanel extends JPanel{
     JRadioButton orangesRB;
     JRadioButton purplesRB;
     ButtonGroup colorRBGroup;
+
+    // Clear and reset panel;
+    JPanel clearAndResetPanel;
+    JLabel clearAndResetLabel;
+    JButton clearAndResetButton;
 
 
 
@@ -248,6 +254,20 @@ public class MainAppPanel extends JPanel{
         this.add(classingAndMappingPanel);
 
         // TODO: add legend.
+
+
+        clearAndResetPanel = new JPanel();
+        GridLayout clearAndResetPanelLayout = new GridLayout(1,2);
+        clearAndResetPanel.setLayout(clearAndResetPanelLayout);
+//        bClearAndReset = BorderFactory.createTitledBorder(bGreyLine, "", TitledBorder.LEFT,  TitledBorder.TOP, null, Color.black);
+//        clearAndResetPanel.setBorder(bClearAndReset);
+        clearAndResetLabel = new JLabel("");
+        clearAndResetPanel.add(clearAndResetLabel);
+        clearAndResetButton = new JButton("Clear & Reset App");
+        // TODO: add ActionListener to button and write method for resetting app.
+        clearAndResetPanel.add(clearAndResetButton);
+        this.add(clearAndResetPanel);
+
 
     }
 
