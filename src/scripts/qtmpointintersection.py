@@ -17,6 +17,7 @@
 
 # Imports ///////////////////////////////////////////////////////////////////////////
 
+import DGGSViewer_script_utilities as su
 import os, sys, argparse, csv, math, datetime
 import numpy as np
 import nvector as nv
@@ -36,10 +37,10 @@ geodesically, on a spherical model of the Earth."""
 
 # Script ////////////////////////////////////////////////////////////////////////////
 
-def intersectsLatLonBoundingBox(aWKTPoint, aWKTPolygon):
+def intersectsPlateCarreeBoundingBox(aWKTPoint, aWKTPolygon):
 
     """Given a WKT point and a WKT polygon, this method assumes they're in the
-    same 2D Cartesian planar coordinate system, and tests whether the point is
+    same 2D plate carree coordinate system, and tests whether the point is
     within the bounding box (aka envelope) of the polygon, returning a Boolean
     indicating the result."""
 
@@ -63,23 +64,21 @@ def intersectsLatLonBoundingBox(aWKTPoint, aWKTPolygon):
     return intersection
 
 
-
-
-def intersects_PolarRayCast(aWKTPoint, aWKTPolygon):
+def intersectionTest_PolarRayCastGeodesicPolygon(aWKTPoint, aWKTPolygon):
         # TODO: write me!
         pass
 
 
-def checkSpheroidal(aWKTPoint, aWKTPolygon):
+def intersectionTest_ConvexSurroundingGeodesicPolygon(aWKTPoint, aWKTPolygon):
 
     """Checks for point-in-QTM facet intersection using a spherical
     model of the Earth by testing that the point is always to the
-    left of each polygon arc (each being an arc of a Great Circle),
-    as arcs proceed counter-clockwise."""
+    left of each polygon arc (each being an arc of a Great Circle
+    on the spherical Earth), as arcs proceed counter-clockwise."""
 
     # See comments in nvector source: https://github.com/pbrod/Nvector/blob/master/nvector/objects.py
     nvFrame   = nv.FrameE(); # Defaults to WGS84, with flattening.
-    nvFrame.f = 0.0 # Zero flattening, makes perfect sphere.
+    nvFrame.f = 0.0 # Zero flattening, makes perfect sphere. Rigorous calculation on ellipsoids are much more involved.
 
     point   = ogr.CreateGeometryFromWkt(aWKTPoint)
     nvPoint = nvFrame.GeoPoint(float(point.GetY()), float(point.GetX()), degrees=True) # lat then lon
@@ -110,21 +109,23 @@ def checkSpheroidal(aWKTPoint, aWKTPolygon):
 
     return intersects
 
+
 def main():
 
     startTime = datetime.datetime.now()
 
     # Parse arguments. Take in 4 required parameters and 1 optional parameter.
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument('QTMFILE', help='GeoJSON file of QTM facets to calculate intersection against points for.')
+    parser.add_argument('QTMFILE', help='File of QTM facets to calculate intersection against points for.')
     parser.add_argument('POINTSCSV', help='CSV file with points to calculate intersection against QTM facets for. Must contain fields for lat and lon coordinates named exactly "latitude" and "longitude", case-specific.')
-    parser.add_argument('OUTFACETSGEOJSON', help='Full path for the product QTM GeoJSON file with spatially-binned statistics.')
+    # parser.add_argument('OUTFACETS', help='Full path for the product QTM GeoJSON file with spatially-binned statistics.')
     parser.add_argument('FIELD', help='Name of the field within the input CSV that statistics will be calculated on. Must be a ratio numerical value in all cells.')
     parser.add_argument('--oi', default=False, action="store_true", help='Write only those facets that have 1 or more point intersect them to the output.')
     args = parser.parse_args()
     inFacetsFilePath = args.QTMFILE
     points  = args.POINTSCSV
-    outFile = args.OUTFACETSGEOJSON
+    # outFile = args.OUTFACETS
+    outFile = su.appendSuffixToFileName(inFacetsFilePath, "_agg")
     inField = args.FIELD
     onlyIntersections = False
     if args.oi:
@@ -142,8 +143,8 @@ def main():
     worldStatPoints = []
 
     # Read QTM facets.
-    print("Reading QTM facets from GeoJSON...")
-    driver     = ogr.GetDriverByName("GeoJSON")
+    print("Reading QTM facets from input...")
+    driver     = su.getDriverByFilepath(inFacetsFilePath)
     dataSource = driver.Open(inFacetsFilePath, 0)
     orig_Layer = dataSource.GetLayer()
     facetCount = orig_Layer.GetFeatureCount()
@@ -193,8 +194,8 @@ def main():
 
                 # The intersection checks. First check the bounding box (cheap and fast rejections),
                 # and then test geodetically if there is bounding box intersection.
-                if intersectsLatLonBoundingBox(pointGeomWKT, facetGeomWKT):
-                    pointIsWithinFacet = checkSpheroidal(pointGeomWKT, facetGeomWKT)
+                if intersectsPlateCarreeBoundingBox(pointGeomWKT, facetGeomWKT):
+                    pointIsWithinFacet = intersectionTest_ConvexSurroundingGeodesicPolygon(pointGeomWKT, facetGeomWKT)
 
                     if pointIsWithinFacet:
 
@@ -219,10 +220,10 @@ def main():
         facetShadowIndex += 1
 
     # Prepare output file.
-    wktCoordSys = """GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]"""
+    print("Preparing output file...")
+    wktCoordSys = su.wktWGS84
     sRef = osr.SpatialReference()
     sRef.ImportFromWkt(wktCoordSys)
-    driver = ogr.GetDriverByName('GeoJSON')
     dst_ds = driver.CreateDataSource(outFile)
     fName  = os.path.splitext(os.path.split(outFile)[1])[0]
     dst_layer  = dst_ds.CreateLayer(fName, sRef, geom_type=ogr.wkbPolygon)
@@ -264,6 +265,7 @@ def main():
     outFacetCount = 0
 
     # Write features and attribute summaries to output file.
+    print("Calculating statistics in facets...")
     for feat in orig_Layer:
 
         thisID = feat.GetField('QTMID')
@@ -333,9 +335,9 @@ def main():
 
     intersectedFacetsCount = len(pointsContainedByPolygon.keys())
     print()
-    print("There were {} input points and {} intersections found overall.".format(str(totalPointCount), str(synopticIntersectionTotal)))
-    print("There were {} input facets, and {} facets were found to have intersections with points.".format(str(facetCount), str(intersectedFacetsCount)))
-    print("The output file contains {} facets.".format(str(outFacetCount)))
+    print("Had {} input points, {} intersections found.".format(str(totalPointCount), str(synopticIntersectionTotal)))
+    print("Had {} input facets, {} facets with point intersection.".format(str(facetCount), str(intersectedFacetsCount)))
+    print("Output file contains {} facets.".format(str(outFacetCount)))
 
     endTime = datetime.datetime.now()
     elapsed = endTime - startTime
