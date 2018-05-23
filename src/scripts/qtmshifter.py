@@ -17,20 +17,20 @@
 # by the 'equirectangular' limits of the lat/lon coordinate system. This means we truncate polygons
 # that cross the -180/180 longitude line. Also, we do not currently re-insert the cut-off parts on the
 # opposite side of the map.
-# TODO: reinsert the cut-off parts of polys at the opposite side of the map.
 
-
-# TODO: Find a way to pull the driver directly from the filetype so it works for more than just GeoJSON files.
+# TODO: reinsert the cut-off parts of polys at the opposite side of the map?
 
 # Imports ///////////////////////////////////////////////////////////////////////////
 
+from qtmgenerator import constructGeometry
+import DGGSViewer_script_utilities as su
 import os, argparse
 from osgeo import ogr, gdal, osr
-from qtmgenerator import constructGeometry
 gdal.UseExceptions()
 
 # Constants /////////////////////////////////////////////////////////////////////////
 
+# The rectangle that represents valid lat/lon coordinates within bounds.
 earthLimitsRing = ogr.Geometry(ogr.wkbLinearRing)
 earthLimitsRing.AddPoint(-180.0, -90.0) # sequence: lon, lat (x,y)
 earthLimitsRing.AddPoint( 180.0, -90.0) # sequence: lon, lat (x,y)
@@ -40,98 +40,88 @@ earthLimitsRing.AddPoint(-180.0, -90.0) # sequence: lon, lat (x,y)
 earthLimitsPolygon = ogr.Geometry(ogr.wkbPolygon)
 earthLimitsPolygon.AddGeometry(earthLimitsRing)
 
+idFieldName = "QTMID"
+
 # Script ////////////////////////////////////////////////////////////////////////////////
 
 def main():
 
     # Parse arguments.
-    parser = argparse.ArgumentParser(description='Accepts a QTM GeoJSON file and produces a copy, translated east or west by the given number of geographical degrees.')
-    parser.add_argument('QTMLEVELJSON', help='The GeoJSON file for the desired QTM level')
-    parser.add_argument('OUTFILEDIR', help='Full path to output directory for the product QTM shapefiles.')
-    parser.add_argument('LON_SHIFT', help = 'Number of degrees to shift QTM in longitudinal direction. Positive numbers shift east, negative shift west.')
+    parser = argparse.ArgumentParser(description='Accepts a QTM file and produces a copy, translated east or west by the given number of geographical degrees.')
+    parser.add_argument('QTMFILE', help='The file for the desired QTM level.')
+    # parser.add_argument('OUTFILEDIR', help='Full path to output directory for the product QTM shapefiles.')
+    parser.add_argument('LONSHIFT', help = 'Number of degrees to shift QTM in longitudinal direction. Positive numbers shift east, negative shift west.')
     args = parser.parse_args()
-    geoJ = args.QTMLEVELJSON
-    outFileDir = args.OUTFILEDIR
-    theta = float(args.LON_SHIFT)
+    qtmFile = args.QTMFILE
+    # outFileDir = args.OUTFILEDIR
+    theta = float(args.LONSHIFT)
 
-    # Loading input GeoJSON.
-    driver = ogr.GetDriverByName("GeoJSON")
-    dataSource = driver.Open(geoJ, 0)
+    # Loading input QTM file.
+    driver = su.getDriverByFilepath(qtmFile)
+    dataSource = driver.Open(qtmFile, 0)
     orig_Layer = dataSource.GetLayer()
     featureCount = orig_Layer.GetFeatureCount()
 
     # Setup for output file name.
-    filename, extension = os.path.splitext(geoJ)
-    baseFileName = os.path.basename(filename)
-    sign = 'p'
-    if (theta < 0):
-        sign = 'n'
+    thetaString = str(theta)
+    desiredSuffix = "lonshft" + thetaString
+    outFileName = su.appendSuffixToFileName(qtmFile, desiredSuffix)
 
     # Declaration of lists and dictionaries.
-    idList = []
-    newFacets = []
-    iterator = 0
+    facetsByQTMID = {}
 
-    # Parses through the geometry of the supplied GeoJSON file.
+    # Parses through the geometry of the supplied QTM file.
     for feature in orig_Layer:
-
-        NewVerts = []
-
-        # Pulls QTMID
+        facetIsWithinBounds = True
+        aFacet = []
         thisPolyID = feature.GetField("QTMID")
-
-        idList.append(thisPolyID)
-
         # This will be a top-most POLYGON defn.
         thisGeom = feature.GetGeometryRef() # This will be a top-most POLYGON (( )) defn.
-
         # Now we go one level deeper to get the ring defining the polygon. We know
         # there is only one geometry (i.e., the ring) within our QTM polygons, so
         # we go straight to index 0 instead of looping:
         subGeom = thisGeom.GetGeometryRef(0)
-
         # Pulls vertices from input file and shifts longitude by theta degrees.
         verts = subGeom.GetPoints()
         for v in verts:
-            vPrime = (v[1], v[0] + theta)
-            NewVerts.append(vPrime)
+            # If any shifted lon point goes beyond 180 E or W, reject this facet.
+            proposedNewLon = v[0] + theta
+            if proposedNewLon > 180.0 or proposedNewLon < -180.0:
+                facetIsWithinBounds = False
+            else:
+                aFacet.append( (v[1], proposedNewLon) ) # lat then lon, from OGR points which are x then y.
 
-        # This last None item is appended to the NewVerts list because
-        # we want to later use qtmgenerator.py's constructGeometry method,
-        # which expects a final element indicating facet orientation. It
-        # isn't actually used by the method, so it's acceptable here to
-        # pass in a dummy variable so the lists are either 5 or 6 elements
-        # long, which is what constructGeometry is written to handle.
-        NewVerts.append(None)
+        if facetIsWithinBounds:
+            # This last dummy item is appended to the aFacet list because
+            # we want to later use qtmgenerator.py's constructGeometry method,
+            # which expects a final element indicating facet orientation. It
+            # isn't actually used by the method, so it's acceptable here to
+            # pass in a dummy variable so the lists are either 5 or 6 elements
+            # long, which is what constructGeometry is written to handle.
+            # A little kludgy, tho!
+            aFacet.append("orientationdummy")
 
-        newFacets.append(NewVerts)
+            facetsByQTMID[thisPolyID] = aFacet
 
     # Sets up the output file.
-    wktCoordSys = """GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]]"""
-    outJSONFileName = baseFileName + "_lon" + sign + str(abs(theta)) + extension
-    print("File name: {}".format(outJSONFileName))
     sRef = osr.SpatialReference()
-    sRef.ImportFromWkt(wktCoordSys)
-    driver = ogr.GetDriverByName('GeoJSON')
-    outFile = os.path.join(outFileDir, outJSONFileName)
-    dst_ds = driver.CreateDataSource(outFile)
-    fName = os.path.splitext(os.path.split(outFile)[1])[0]
+    sRef.ImportFromWkt(su.wktWGS84)
+    dst_ds = driver.CreateDataSource(outFileName)
+    fName = os.path.splitext(os.path.split(outFileName)[1])[0]
     dst_layer = dst_ds.CreateLayer(fName, sRef, geom_type=ogr.wkbPolygon)
     levelFieldName = 'QTMID'
     layer_defn = dst_layer.GetLayerDefn()
-    new_field = ogr.FieldDefn(levelFieldName, ogr.OFTInteger)
+    new_field = ogr.FieldDefn(levelFieldName, ogr.OFTInteger) # String?
     dst_layer.CreateField(new_field)
 
     # Create features and write to file.
-    for f in newFacets:
-        feature = ogr.Feature(layer_defn)
-        feature.SetField('QTMID', idList[iterator])
-        facetGeometry = constructGeometry(f)
+    for facetRecordKey in facetsByQTMID.keys():
+        facetGeometry = constructGeometry(facetsByQTMID[facetRecordKey])
         # Before creating them, intersect them with earthLimitsPolygon to ensure
         # we don't create features beyond the allowable lat/lon coords. Also
         # ensure there's actually some geometry there; if not, don't write
         # this feature to file.
-        facetGeometryWithinBounds = facetGeometry.Intersection(earthLimitsPolygon)
+        # facetGeometryWithinBounds = facetGeometry.Intersection(earthLimitsPolygon)
         # Below, there should be a non-zero count to the intersection geometry.
         # Also, it seems a no-polygon intersection result is of type "GeometryCollection",
         # so could possibly use
@@ -139,11 +129,14 @@ def main():
         #   or
         #   facetGeometryWithinBounds.GetGeometryName() == "Polygon"
         # as a condition too.
-        if facetGeometryWithinBounds.GetGeometryCount():
-            feature.SetGeometry(facetGeometryWithinBounds)
+        # if facetGeometryWithinBounds.GetGeometryCount():
+        if facetGeometry.GetGeometryCount():
+            feature = ogr.Feature(layer_defn)
+            feature.SetField(levelFieldName, facetRecordKey)
+            # feature.SetGeometry(facetGeometryWithinBounds)
+            feature.SetGeometry(facetGeometry)
             dst_layer.CreateFeature(feature)
-        iterator = iterator + 1 # Iterate whether or not we write a feature, to keep sync.
-        feature.Destroy()  # Destroy the feature to free resources.
+            feature.Destroy()  # Destroy the feature to free resources.
 
     dst_ds.Destroy()  # Destroy the data source to free resouces.
 

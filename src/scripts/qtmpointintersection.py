@@ -36,10 +36,46 @@ geodesically, on a spherical model of the Earth."""
 
 # Script ////////////////////////////////////////////////////////////////////////////
 
+def intersectsLatLonBoundingBox(aWKTPoint, aWKTPolygon):
+
+    """Given a WKT point and a WKT polygon, this method assumes they're in the
+    same 2D Cartesian planar coordinate system, and tests whether the point is
+    within the bounding box (aka envelope) of the polygon, returning a Boolean
+    indicating the result."""
+
+    point   = ogr.CreateGeometryFromWkt(aWKTPoint)
+    ptLat = point.GetY()
+    ptLon = point.GetX()
+
+    polygon  = ogr.CreateGeometryFromWkt(aWKTPolygon)
+    subGeom  = polygon.GetGeometryRef(0) # Assumes only one outside linear ring!
+    subGeomVertices = subGeom.GetPoints()
+    latVals = [v[1] for v in subGeomVertices]
+    lonVals = [v[0] for v in subGeomVertices]
+
+    withinLatBounds = min(latVals) <= ptLat and max(latVals) >= ptLat
+    withinLonBounds = min(lonVals) <= ptLon and max(lonVals) >= ptLon
+
+    intersection = False
+    if withinLatBounds and withinLonBounds:
+        intersection = True
+
+    return intersection
+
+
+
+
+def intersects_PolarRayCast(aWKTPoint, aWKTPolygon):
+        # TODO: write me!
+        pass
+
+
 def checkSpheroidal(aWKTPoint, aWKTPolygon):
 
-    """Checks for point-in-triangle intersection using a spherical
-    model of the Earth."""
+    """Checks for point-in-QTM facet intersection using a spherical
+    model of the Earth by testing that the point is always to the
+    left of each polygon arc (each being an arc of a Great Circle),
+    as arcs proceed counter-clockwise."""
 
     # See comments in nvector source: https://github.com/pbrod/Nvector/blob/master/nvector/objects.py
     nvFrame   = nv.FrameE(); # Defaults to WGS84, with flattening.
@@ -69,7 +105,6 @@ def checkSpheroidal(aWKTPoint, aWKTPolygon):
             liesLeftList.append(True)
         else:
             liesLeftList.append(False)
-        iPoint = gcArc.closest_point_on_great_circle(nvPoint)
 
     intersects = all(liesLeftList) # True if everything in liesLeftList evaluates to True, else False.
 
@@ -81,13 +116,13 @@ def main():
 
     # Parse arguments. Take in 4 required parameters and 1 optional parameter.
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument('INFACETSGEOJSON', help='GeoJSON file of QTM facets to calculate intersection against points for.')
+    parser.add_argument('QTMFILE', help='GeoJSON file of QTM facets to calculate intersection against points for.')
     parser.add_argument('POINTSCSV', help='CSV file with points to calculate intersection against QTM facets for. Must contain fields for lat and lon coordinates named exactly "latitude" and "longitude", case-specific.')
     parser.add_argument('OUTFACETSGEOJSON', help='Full path for the product QTM GeoJSON file with spatially-binned statistics.')
     parser.add_argument('FIELD', help='Name of the field within the input CSV that statistics will be calculated on. Must be a ratio numerical value in all cells.')
     parser.add_argument('--oi', default=False, action="store_true", help='Write only those facets that have 1 or more point intersect them to the output.')
     args = parser.parse_args()
-    inFacetsFilePath = args.INFACETSGEOJSON
+    inFacetsFilePath = args.QTMFILE
     points  = args.POINTSCSV
     outFile = args.OUTFACETSGEOJSON
     inField = args.FIELD
@@ -156,24 +191,26 @@ def main():
                 point.AddPoint(thisLon, thisLat) # lon then lat
                 pointGeomWKT = str(point)
 
-                # The intersection check, returns boolean.
-                pointIsWithinFacet = checkSpheroidal(pointGeomWKT, facetGeomWKT)
+                # The intersection checks. First check the bounding box (cheap and fast rejections),
+                # and then test geodetically if there is bounding box intersection.
+                if intersectsLatLonBoundingBox(pointGeomWKT, facetGeomWKT):
+                    pointIsWithinFacet = checkSpheroidal(pointGeomWKT, facetGeomWKT)
 
-                if pointIsWithinFacet:
+                    if pointIsWithinFacet:
 
-                    # Add it to those points in pointsContainedByPolygon keyed by this
-                    # facetID value, or create that list in the dictionary under this
-                    # facetID value.
-                    if facetID in pointsContainedByPolygon.keys():
-                        pointsContainedByPolygon[facetID].append(worldStatPoints[pI])
-                    else:
-                        pointsContainedByPolygon[facetID] = [ worldStatPoints[pI] ]
+                        # Add it to those points in pointsContainedByPolygon keyed by this
+                        # facetID value, or create that list in the dictionary under this
+                        # facetID value.
+                        if facetID in pointsContainedByPolygon.keys():
+                            pointsContainedByPolygon[facetID].append(worldStatPoints[pI])
+                        else:
+                            pointsContainedByPolygon[facetID] = [ worldStatPoints[pI] ]
 
-                    synopticIntersectionTotal += 1
+                        synopticIntersectionTotal += 1
 
-                    # Set this point to None so we don't check it again, since it
-                    # won't intersect another facet at this level. Speeds script up.
-                    worldStatPoints[pI] = None
+                        # Set this point to None so we don't check it again, since it
+                        # won't intersect another facet at this level. Speeds script up.
+                        worldStatPoints[pI] = None
 
         sys.stdout.write("\r")
         prcnt    = ((facetShadowIndex + 1) * 100) / len(orig_Layer)
