@@ -34,6 +34,7 @@ public class App {
     // longitudinal shift.
     public HashMap<Integer,HashMap> intersectionLevelHM;
 
+    public int minQTMLevel = 3;
     public int maxQTMLevels = 6;
     public int defaultQTMLevel = 4;
     private int currentlySelectedQTMLevel = defaultQTMLevel;
