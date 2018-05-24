@@ -25,7 +25,7 @@ public class MainAppPanel extends JPanel{
     JPanel binningPanel;
     JLabel chooseFileLabel;
     JPanel dataLoadingButtonsPanel;
-    JButton usePrePreparedDataButton;
+    JButton usePreparedDataButton;
     String chooseFileButtonText = "Choose file";
     JButton chooseFileButton;
     JLabel attrToBinLabel;
@@ -42,6 +42,10 @@ public class MainAppPanel extends JPanel{
     JSlider levelSlider;
     JLabel EWTranslateLabel;
     JSlider EWTranslateSlider;
+    JLabel exportGeoJSONLabel;
+    JPanel exportGeoJSONPanel;
+    JButton exportSingleGeoJSONButton;
+    JButton exportAllGeoJSONButton;
 
     // Classification and Mapping panel
     JPanel classingAndMappingPanel;
@@ -89,9 +93,9 @@ public class MainAppPanel extends JPanel{
         FlowLayout dataLoadingButtonsPanellayout = (FlowLayout)dataLoadingButtonsPanel.getLayout();
         dataLoadingButtonsPanellayout.setVgap(0);
         dataLoadingButtonsPanellayout.setHgap(0);
-        usePrePreparedDataButton = new JButton("Use built-in");
-        usePrePreparedDataButton.setToolTipText("Use included and prepared data: Natural Earth populated places throughout Africa.");
-        usePrePreparedDataButton.addActionListener(new ActionListener() {
+        usePreparedDataButton = new JButton("Use built-in");
+        usePreparedDataButton.setToolTipText("Use included and prepared data: Natural Earth populated places throughout Africa.");
+        usePreparedDataButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // Load the built-in dataset, make the choose file button unavailable,
@@ -106,7 +110,7 @@ public class MainAppPanel extends JPanel{
                 Main.app.performBinning();
             }
         });
-        dataLoadingButtonsPanel.add(usePrePreparedDataButton);
+        dataLoadingButtonsPanel.add(usePreparedDataButton);
         chooseFileButton = new JButton(this.chooseFileButtonText);
         chooseFileButton.addActionListener(new ActionListener() {
             @Override
@@ -117,7 +121,7 @@ public class MainAppPanel extends JPanel{
                 int returnVal = fc.showOpenDialog(binningPanel);
                 // Below, use a truncated name so the button doesn't grow (much) in size.
                 chooseFileButton.setText(truncateString(fc.getSelectedFile().getName(), 8));
-                usePrePreparedDataButton.setEnabled(false);
+                usePreparedDataButton.setEnabled(false);
                 Main.app.receiveUserCSVPath(fc.getSelectedFile().toPath().toString());
             }
         });
@@ -176,7 +180,7 @@ public class MainAppPanel extends JPanel{
         maupPanel = new JPanel();
         bMAUPTitled = BorderFactory.createTitledBorder(bGreyLine, "Modifiable Areal Units", TitledBorder.LEFT,  TitledBorder.TOP, null, Color.black);
         maupPanel.setBorder(bMAUPTitled);
-        maupPanel.setLayout(new GridLayout(2,2));
+        maupPanel.setLayout(new GridLayout(3,2));
         levelLabel = new JLabel("<html><b>Scaling</b> (QTM level to draw):</html>");
         maupPanel.add(levelLabel);
         levelSlider = new JSlider(Main.app.minQTMLevel, Main.app.maxQTMLevels, Main.app.defaultQTMLevel);
@@ -205,11 +209,19 @@ public class MainAppPanel extends JPanel{
             }
         });
         maupPanel.add(EWTranslateSlider);
+        exportGeoJSONLabel = new JLabel("Export to GeoJSON:");
+        maupPanel.add(exportGeoJSONLabel);
+        exportGeoJSONPanel = new JPanel();
+        exportSingleGeoJSONButton = new JButton("This permutation");
+        exportAllGeoJSONButton = new JButton("All");
+        exportGeoJSONPanel.add(exportSingleGeoJSONButton);
+        exportGeoJSONPanel.add(exportAllGeoJSONButton);
+        maupPanel.add(exportGeoJSONPanel);
         this.add(maupPanel);
 
         // Classing and Mapping Panel
         classingAndMappingPanel = new JPanel();
-        bClassificationTitled = BorderFactory.createTitledBorder(bGreyLine, "Choropleth Classification", TitledBorder.LEFT, TitledBorder.TOP, null, Color.black);
+        bClassificationTitled = BorderFactory.createTitledBorder(bGreyLine, "Visualization", TitledBorder.LEFT, TitledBorder.TOP, null, Color.black);
         classingAndMappingPanel.setBorder(bClassificationTitled);
         GridLayout binningPanelLayout = new GridLayout(2,2);
         classingAndMappingPanel.setLayout(binningPanelLayout);
@@ -227,7 +239,7 @@ public class MainAppPanel extends JPanel{
             }
         });
         classingAndMappingPanel.add(quantilesSlider);
-        colorLabel = new JLabel("Color ramp:");
+        colorLabel = new JLabel("Choropleth color ramp:");
         classingAndMappingPanel.add(colorLabel);
         colorRadioButtonsPanel = new JPanel();
         colorRadioButtonsPanel.setLayout(new BoxLayout(colorRadioButtonsPanel, BoxLayout.LINE_AXIS));
@@ -285,7 +297,7 @@ public class MainAppPanel extends JPanel{
         }
     }
     public void disableAllBinningControls(){
-        this.usePrePreparedDataButton.setEnabled(false);
+        this.usePreparedDataButton.setEnabled(false);
         this.chooseFileButton.setEnabled(false);
         this.levelIntersectionCalculationCB.setEnabled(false);
         this.attrToBinCB.setEnabled(false);
@@ -293,7 +305,7 @@ public class MainAppPanel extends JPanel{
     }
 
     public void resetAllBinningControls(){
-        this.usePrePreparedDataButton.setEnabled(true);
+        this.usePreparedDataButton.setEnabled(true);
         this.chooseFileButton.setText(this.chooseFileButtonText);
         this.chooseFileButton.setEnabled(true);
         this.levelIntersectionCalculationCB.setEnabled(true);

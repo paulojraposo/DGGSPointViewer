@@ -1,9 +1,11 @@
 import com.Ostermiller.util.CSVParser;
 import com.Ostermiller.util.LabeledCSVParser;
+import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -155,12 +157,15 @@ public class App {
                 String.valueOf(this.currentlySelectedQTMLevel),
                 String.valueOf(Double.valueOf(lonShiftVal)) //+ ".0" // Paste-on .0 since the Python script names its outputs using decimal numbers, not integers.
                 );
-        System.out.println(Double.valueOf(lonShiftVal)) ;
         Layer lyr = gjLoader.createLayerFromSource(qtmResourceFilePath);
         lyr.setName(qtmLayerName);
         this.aF.getWwd().getModel().getLayers().add(lyr);
         // Move QTM layer to the top
         // this.aF.getWwd().getModel().getLayers().set(0,lyr);
+    }
+
+    public void rotateGlobeToLayerByName(String layerName){
+        // TODO: write me!
     }
 
     public void loadChoroplethGeoJSON(){
