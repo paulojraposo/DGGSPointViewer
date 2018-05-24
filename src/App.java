@@ -1,8 +1,13 @@
 import com.Ostermiller.util.CSVParser;
 import com.Ostermiller.util.LabeledCSVParser;
 import gov.nasa.worldwind.View;
+import gov.nasa.worldwind.WorldWindow;
+import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.geom.*;
+import gov.nasa.worldwind.geom.Box;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.util.Logging;
 
 import javax.swing.*;
 import java.awt.*;
@@ -221,7 +226,13 @@ public class App {
         mlm.makeMarkers();
         Layer markerLayer = mlm.makeMarkerLayer();
         markerLayer.setName(dataPointsLayerName);
+        Sector sector = (Sector) markerLayer.getValue(AVKey.SECTOR);
         this.aF.getWwd().getModel().getLayers().add(markerLayer);
+
+        // Rotate the globe to the loaded data.
+        // TODO: make this location programatic, not hard-coded.
+        LatLon rotateLatLon = LatLon.fromDegrees(4.0, 19.0); // Approx the center of Africa.
+        this.aF.getWwd().getView().goTo(new Position(rotateLatLon,0.0), 12000000.0);
     }
 
     public void performBinning(){
@@ -257,6 +268,49 @@ public class App {
         hasBinned = false;
         aF.mainAppPanel.resetAllBinningControls();
         triggerRedraw();
+    }
+
+    /**
+     * Causes the View attached to the specified WorldWindow to animate to the specified sector. The View starts
+     * animating at its current location and stops when the sector fills the window.
+     *
+     * @param wwd    the WorldWindow who's View animates.
+     * @param sector the sector to go to.
+     *
+     * @throws IllegalArgumentException if either the <code>wwd</code> or the <code>sector</code> are
+     *                                  <code>null</code>.
+     */
+    public static void goTo(WorldWindow wwd, Sector sector)
+    {
+        if (wwd == null)
+        {
+            String message = Logging.getMessage("nullValue.WorldWindow");
+            Logging.logger().severe(message);
+            throw new IllegalArgumentException(message);
+        }
+
+        if (sector == null)
+        {
+            String message = Logging.getMessage("nullValue.SectorIsNull");
+            Logging.logger().severe(message);
+            throw new IllegalArgumentException(message);
+        }
+
+        // Create a bounding box for the specified sector in order to estimate its size in model coordinates.
+        Box extent = Sector.computeBoundingBox(wwd.getModel().getGlobe(),
+                wwd.getSceneController().getVerticalExaggeration(), sector);
+
+        // Estimate the distance between the center position and the eye position that is necessary to cause the sector to
+        // fill a viewport with the specified field of view. Note that we change the distance between the center and eye
+        // position here, and leave the field of view constant.
+        Angle fov = wwd.getView().getFieldOfView();
+        double zoom = extent.getRadius() / fov.cosHalfAngle() / fov.tanHalfAngle();
+
+        // Configure OrbitView to look at the center of the sector from our estimated distance. This causes OrbitView to
+        // animate to the specified position over several seconds. To affect this change immediately use the following:
+        // ((OrbitView) wwd.getView()).setCenterPosition(new Position(sector.getCentroid(), 0d));
+        // ((OrbitView) wwd.getView()).setZoom(zoom);
+        wwd.getView().goTo(new Position(sector.getCentroid(), 0d), zoom);
     }
 
 
