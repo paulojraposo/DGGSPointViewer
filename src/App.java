@@ -150,16 +150,12 @@ public class App {
         values for QTM level and longitudinal shift.
         TODO: Put this into its own method; we'll need essentially the same logic when loading binned data layers.
          */
-        Integer lonShiftAbsVal = Math.abs(this.currentlySelectedLonShift);
-        String positiveOrNegative = "p";
-        if (this.currentlySelectedLonShift < 0.0){
-            positiveOrNegative = "n";
-        }
-        String qtmResourceFilePath = String.format("out/resources/qtmlevels/qtmlvl%s_lon%s%s.geojson",
+        Integer lonShiftVal = this.currentlySelectedLonShift;
+        String qtmResourceFilePath = String.format("out/resources/prepareddata/blankQTM/qtmlvl%slonshft%s.geojson",
                 String.valueOf(this.currentlySelectedQTMLevel),
-                positiveOrNegative,
-                String.valueOf(Math.abs(this.currentlySelectedLonShift)) + ".0" // Paste-on .0 since the Python script names its outputs using decimal numbers, not integers.
+                String.valueOf(Double.valueOf(lonShiftVal)) //+ ".0" // Paste-on .0 since the Python script names its outputs using decimal numbers, not integers.
                 );
+        System.out.println(Double.valueOf(lonShiftVal)) ;
         Layer lyr = gjLoader.createLayerFromSource(qtmResourceFilePath);
         lyr.setName(qtmLayerName);
         this.aF.getWwd().getModel().getLayers().add(lyr);

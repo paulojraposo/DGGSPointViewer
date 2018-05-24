@@ -90,7 +90,7 @@ public class MainAppPanel extends JPanel{
         dataLoadingButtonsPanellayout.setVgap(0);
         dataLoadingButtonsPanellayout.setHgap(0);
         usePrePreparedDataButton = new JButton("Use built-in");
-        usePrePreparedDataButton.setToolTipText("Use included and prepared Natural Earth world populated places data.");
+        usePrePreparedDataButton.setToolTipText("Use included and prepared data: Natural Earth populated places throughout Africa.");
         usePrePreparedDataButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -98,7 +98,7 @@ public class MainAppPanel extends JPanel{
                 // and set the main app Boolean usingPreparedData, which in turn
                 // signals to not actually perform binning, but use preloaded geojson
                 // files.
-                File preparedDataCSVFile = new File("out/resources/prepareddata/popplacesforapp.csv");
+                File preparedDataCSVFile = new File("out/resources/prepareddata/AfricaPopPlaces/AfricaPopulatedPlacesForApp.csv");
                 String prepreparedDataPathString = preparedDataCSVFile.toPath().toString();
                 Main.app.usingPreparedData = true;
                 Main.app.receiveUserCSVPath(prepreparedDataPathString);
