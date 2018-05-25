@@ -31,7 +31,7 @@ public class App {
     DefaultComboBoxModel cbModel;
 
     // Limited maxBinningLevel to 7, down from 11, 2018-05-18, for performance's sake, for now.
-    private int maxBinningLevel = 6; // 7th level's index, by default, user-changeable.
+    public int maxBinningLevel = 6; // 7th level's index, by default, user-changeable.
     public String[] levelOptions = new String[]{"1", "2", "3", "4", "5", "6", "7"};//,
             //"8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"};
 
@@ -84,7 +84,11 @@ public class App {
         // based on whether the user has binned yet.
         removeQTMLayer();
         if (hasBinned == true){
-            loadChoroplethGeoJSON();
+            if (usingPreparedData == true){
+                loadIncludedChoroplethGeoJSON();
+            }else{
+//                loadChoroplethGeoJSON();
+            }
         }else {
             loadBlankGeoJSON();
         }
@@ -110,15 +114,7 @@ public class App {
     }
 
     public void setMaxBinningLevel(Integer lvl){
-        maxBinningLevel = lvl;
-    }
-
-    public Integer getMaxBinningLevel(){
-        return maxBinningLevel;
-    }
-
-    public Integer getMaxTranslationDegrees(){
-        return maximumLonShift;
+        this.maxBinningLevel = lvl;
     }
 
     public void setAttrToBin(String attribute){
@@ -148,6 +144,10 @@ public class App {
         }
     }
 
+    public void rotateGlobeToLayerByName(String layerName){
+        // TODO: write me!
+    }
+
     public void loadBlankGeoJSON(){
         AppGeoJSONLoader gjLoader = new AppGeoJSONLoader();
         /*
@@ -157,10 +157,9 @@ public class App {
         values for QTM level and longitudinal shift.
         TODO: Put this into its own method; we'll need essentially the same logic when loading binned data layers.
          */
-        Integer lonShiftVal = this.currentlySelectedLonShift;
         String qtmResourceFilePath = String.format("out/resources/prepareddata/blankQTM/qtmlvl%slonshft%s.geojson",
                 String.valueOf(this.currentlySelectedQTMLevel),
-                String.valueOf(Double.valueOf(lonShiftVal)) //+ ".0" // Paste-on .0 since the Python script names its outputs using decimal numbers, not integers.
+                String.valueOf(Double.valueOf(this.currentlySelectedLonShift)) //+ ".0" // Paste-on .0 since the Python script names its outputs using decimal numbers, not integers.
                 );
         Layer lyr = gjLoader.createLayerFromSource(qtmResourceFilePath);
         lyr.setName(qtmLayerName);
@@ -169,15 +168,16 @@ public class App {
         // this.aF.getWwd().getModel().getLayers().set(0,lyr);
     }
 
-    public void rotateGlobeToLayerByName(String layerName){
-        // TODO: write me!
-    }
-
-    public void loadChoroplethGeoJSON(){
-        // TODO: write me!
-        System.out.println("Would be loading data-filled choropleth GeoJSON here.");
+    public void loadIncludedChoroplethGeoJSON(){
+        AppGeoJSONLoader gjLoader = new AppGeoJSONLoader();
         if (this.usingPreparedData == true){
-            System.out.println("Would be loading prepared data here.");
+            String qtmResourceFilePath = String.format("out/resources/prepareddata/AfricaPopPlaces/qtmlvl%slonshft%s_agg.geojson",
+            String.valueOf(this.currentlySelectedQTMLevel),
+            String.valueOf(Double.valueOf(this.currentlySelectedLonShift))
+            );
+        Layer lyr = gjLoader.createLayerFromSource(qtmResourceFilePath);
+        lyr.setName(qtmLayerName + " Africa Populated Places");
+        this.aF.getWwd().getModel().getLayers().add(lyr);
         }
     }
 

@@ -130,7 +130,7 @@ public class MainAppPanel extends JPanel{
         levelChoosingLabel = new JLabel("Bin up to QTM level:");
         binningPanel.add(levelChoosingLabel);
         levelIntersectionCalculationCB = new JComboBox<String>(Main.app.levelOptions);
-        levelIntersectionCalculationCB.setSelectedIndex(Main.app.getMaxBinningLevel());
+        levelIntersectionCalculationCB.setSelectedIndex(Main.app.maxBinningLevel);
         // below from https://stackoverflow.com/questions/11008431/how-to-center-items-in-a-java-combobox
         ((JLabel) levelIntersectionCalculationCB.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
         levelIntersectionCalculationCB.addActionListener(new ActionListener() {
