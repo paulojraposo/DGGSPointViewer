@@ -57,6 +57,7 @@ public class App {
     private int currentlySelectedQuantileCount = defaultQuantileCount;
 
     private String qtmLayerName = "QTM";
+    private String currentlyLoadedQTMDataLayerName = qtmLayerName;
     private String dataPointsLayerName = "Data Points";
 
     public Boolean usingPreparedData = false;
@@ -82,7 +83,7 @@ public class App {
     public void triggerRedraw(){
         // Remove the previous QTM layer and use the relevant GeoJSON loading method,
         // based on whether the user has binned yet.
-        removeQTMLayer();
+        removeLayerByName(this.currentlyLoadedQTMDataLayerName);
         if (hasBinned == true){
             if (usingPreparedData == true){
                 loadIncludedChoroplethGeoJSON();
@@ -135,6 +136,15 @@ public class App {
         }
     }
 
+    public void removeLayerByName(String layerName){
+        LayerList ll = this.aF.getWwd().getModel().getLayers();
+        for (Layer l: ll){
+            if (l.getName() == layerName){
+                this.aF.getWwd().getModel().getLayers().remove(l);
+            }
+        }
+    }
+
     public void removeDataPointsLayer(){
         LayerList ll = this.aF.getWwd().getModel().getLayers();
         for (Layer l: ll){
@@ -176,7 +186,8 @@ public class App {
             String.valueOf(Double.valueOf(this.currentlySelectedLonShift))
             );
         Layer lyr = gjLoader.createLayerFromSource(qtmResourceFilePath);
-        lyr.setName(qtmLayerName + " Africa Populated Places");
+        this.currentlyLoadedQTMDataLayerName = qtmLayerName + " Africa Populated Places";
+        lyr.setName(this.currentlyLoadedQTMDataLayerName);
         this.aF.getWwd().getModel().getLayers().add(lyr);
         }
     }
@@ -259,7 +270,7 @@ public class App {
 
     public void resetAppState(){
         // Reset things to the state the app is in when first started up.
-        removeQTMLayer();
+        removeLayerByName(this.currentlyLoadedQTMDataLayerName);
         removeDataPointsLayer();
         csvFieldNames = null;
         this.cbModel = new DefaultComboBoxModel(); // A new empty DefaultComboBoxModel.
