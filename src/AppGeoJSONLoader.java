@@ -5,22 +5,30 @@
  */
 //package gov.nasa.worldwindx.examples;
 
+import com.google.common.math.Quantiles;
 import gov.nasa.worldwind.WorldWind;
-import gov.nasa.worldwind.avlist.*;
-import gov.nasa.worldwind.render.Polygon;
-import gov.nasa.worldwindx.examples.util.RandomShapeAttributes;
+import gov.nasa.worldwind.avlist.AVKey;
+import gov.nasa.worldwind.avlist.AVList;
 import gov.nasa.worldwind.exception.WWRuntimeException;
 import gov.nasa.worldwind.formats.geojson.*;
 import gov.nasa.worldwind.geom.Position;
-import gov.nasa.worldwind.layers.*;
+import gov.nasa.worldwind.layers.Layer;
+import gov.nasa.worldwind.layers.RenderableLayer;
 import gov.nasa.worldwind.render.*;
-import gov.nasa.worldwind.util.*;
+import gov.nasa.worldwind.render.Polygon;
+import gov.nasa.worldwind.util.Logging;
+import gov.nasa.worldwind.util.WWIO;
+import gov.nasa.worldwind.util.WWUtil;
+import gov.nasa.worldwindx.examples.util.RandomShapeAttributes;
 
 import java.awt.*;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.logging.Level;
+
+import static com.google.common.math.Quantiles.percentiles;
 
 /**
  * Utility class to load data from a GeoJSON source into a layer.
@@ -295,7 +303,6 @@ public class AppGeoJSONLoader
     protected void addRenderableForLineString(GeoJSONLineString geom, RenderableLayer layer, AVList properties)
     {
         ShapeAttributes attrs = this.createPolylineAttributes(geom, layer);
-
         layer.addRenderable(this.createPolyline(geom, geom.getCoordinates(), attrs, properties));
     }
 
@@ -311,13 +318,11 @@ public class AppGeoJSONLoader
 
     protected void addRenderableForPolygon(GeoJSONPolygon geom, RenderableLayer layer, AVList properties)
     {
-//        ShapeAttributes attrs = this.createPolygonAttributes(geom, layer);
         ShapeAttributes attrs = this.createBlankPolygonAttributes();
-
         if (Main.app.hasBinned == true){
             if (Main.app.attrToBin != null){
                 Double thisMean = (Double) properties.getValue("Mean");
-                System.out.println(String.valueOf(thisMean));
+//                System.out.println(String.valueOf(thisMean));
                 if (thisMean > 0.0){
                     System.out.println("tripped the if");
                     attrs.setInteriorMaterial(new Material(Color.GREEN) );
