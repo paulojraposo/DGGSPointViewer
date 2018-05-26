@@ -18,6 +18,8 @@ import gov.nasa.worldwind.util.*;
 
 import java.awt.*;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.Set;
 import java.util.logging.Level;
 
 /**
@@ -67,6 +69,7 @@ public class AppGeoJSONLoader
             if (doc.getRootObject() instanceof GeoJSONObject)
             {
                 this.addGeoJSONGeometryToLayer((GeoJSONObject) doc.getRootObject(), layer);
+                System.out.println("was GeoJSONObject");
             }
             else if (doc.getRootObject() instanceof Object[])
             {
@@ -75,6 +78,7 @@ public class AppGeoJSONLoader
                     if (o instanceof GeoJSONObject)
                     {
                         this.addGeoJSONGeometryToLayer((GeoJSONObject) o, layer);
+                        System.out.println("Wasn't GeoJSONObject");
                     }
                     else
                     {
@@ -193,29 +197,38 @@ public class AppGeoJSONLoader
 
     protected void addRenderableForGeometry(GeoJSONGeometry geom, RenderableLayer layer, AVList properties)
     {
-        if (geom.isPoint())
+        // Getting at the attributes for this feature:
+        Set entries =properties.getEntries();
+//        System.out.println(String.valueOf(entries));
+
+//        Double val = (Double) properties.getValue(Main.app.attrToBin);
+//        System.out.println("value of " + Main.app.attrToBin + " is " + String.valueOf(val));
+
+        if (geom.isPoint()) {
             this.addRenderableForPoint(geom.asPoint(), layer, properties);
-
-        else if (geom.isMultiPoint())
+        }
+        else if (geom.isMultiPoint()) {
             this.addRenderableForMultiPoint(geom.asMultiPoint(), layer, properties);
-
-        else if (geom.isLineString())
+        }
+        else if (geom.isLineString()) {
             this.addRenderableForLineString(geom.asLineString(), layer, properties);
-
-        else if (geom.isMultiLineString())
+        }
+        else if (geom.isMultiLineString()) {
             this.addRenderableForMutiLineString(geom.asMultiLineString(), layer, properties);
-
-        else if (geom.isPolygon())
+        }
+        else if (geom.isPolygon()) {
+//            System.out.println("POLY");
             this.addRenderableForPolygon(geom.asPolygon(), layer, properties);
-
-        else if (geom.isMultiPolygon())
+        }
+        else if (geom.isMultiPolygon()) {
             this.addRenderableForMultiPolygon(geom.asMultiPolygon(), layer, properties);
-
-        else if (geom.isGeometryCollection())
+        }
+        else if (geom.isGeometryCollection()) {
             this.addRenderableForGeometryCollection(geom.asGeometryCollection(), layer, properties);
-
-        else
+        }
+        else {
             this.handleUnrecognizedObject(geom);
+        }
     }
 
     protected void addRenderableForGeometryCollection(GeoJSONGeometryCollection c, RenderableLayer layer,
@@ -251,6 +264,13 @@ public class AppGeoJSONLoader
             // This is getting called for each of our GeoJSON features (i.e., facets)
             // To get at all the values per feature:
             // System.out.println(feat.getProperties().getValues());
+//            try{
+//                feat.getProperties().getValue(Main.app.attrToBin);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+            System.out.println("damn");
+
             this.addRenderableForFeature(feat, layer);
         }
     }
@@ -291,7 +311,22 @@ public class AppGeoJSONLoader
 
     protected void addRenderableForPolygon(GeoJSONPolygon geom, RenderableLayer layer, AVList properties)
     {
-        ShapeAttributes attrs = this.createPolygonAttributes(geom, layer);
+//        ShapeAttributes attrs = this.createPolygonAttributes(geom, layer);
+        ShapeAttributes attrs = this.createBlankPolygonAttributes();
+
+        if (Main.app.hasBinned == true){
+            if (Main.app.attrToBin != null){
+                Double thisMean = (Double) properties.getValue("Mean");
+                System.out.println(String.valueOf(thisMean));
+                if (thisMean > 0.0){
+                    System.out.println("tripped the if");
+                    attrs.setInteriorMaterial(new Material(Color.GREEN) );
+                    attrs.setInteriorOpacity(1.0);
+                    attrs.setDrawInterior(true);
+                    System.out.println(attrs.getInteriorOpacity());
+                }
+            }
+        }
 
         layer.addRenderable(this.createPolygon(geom, geom.getExteriorRing(), geom.getInteriorRings(), attrs,
             properties));
@@ -305,6 +340,7 @@ public class AppGeoJSONLoader
         {
             layer.addRenderable(
                 this.createPolygon(geom, geom.getExteriorRing(i), geom.getInteriorRings(i), attrs, properties));
+                System.out.println("MULTIPOLYGON");
         }
     }
 
@@ -385,6 +421,7 @@ public class AppGeoJSONLoader
         }
         else
         {
+            System.out.println("Making SurfacePolygon");
             SurfacePolygon poly = new SurfacePolygon(attrs, outerBoundary);
 
             if (innerBoundaries != null)
@@ -451,6 +488,13 @@ public class AppGeoJSONLoader
         return attrs;
     }
 
+    private ShapeAttributes createBlankPolygonAttributes(){
+        BasicShapeAttributes bA = new BasicShapeAttributes();
+        bA.setInteriorOpacity(0.0);
+        bA.setOutlineMaterial(new Material(Color.WHITE));
+        return bA;
+    }
+
     @SuppressWarnings( {"UnusedDeclaration"})
     protected ShapeAttributes createPolygonAttributes(GeoJSONGeometry geom, Layer layer)
     {
@@ -465,9 +509,8 @@ public class AppGeoJSONLoader
             layer.setValue(key, attrs);
         }
 
-        attrs.setOutlineMaterial(new Material(Color.WHITE));
-        // attrs.setInteriorMaterial(new Material(Color.GREEN));
-        attrs.setInteriorOpacity(0.0);
+//        attrs.setOutlineMaterial(new Material(Color.WHITE));
+//        attrs.setInteriorOpacity(0.0);
 
         return attrs;
     }

@@ -83,6 +83,7 @@ public class App {
     public void triggerRedraw(){
         // Remove the previous QTM layer and use the relevant GeoJSON loading method,
         // based on whether the user has binned yet.
+        removeLayerByName("QTM");
         removeLayerByName(this.currentlyLoadedQTMDataLayerName);
         if (hasBinned == true){
             if (usingPreparedData == true){
@@ -92,6 +93,7 @@ public class App {
 //                loadChoroplethGeoJSON();
             }
         }else {
+            System.out.println("loading blank geojson");
             loadBlankGeoJSON();
         }
     }
@@ -173,25 +175,28 @@ public class App {
                 String.valueOf(Double.valueOf(this.currentlySelectedLonShift)) //+ ".0" // Paste-on .0 since the Python script names its outputs using decimal numbers, not integers.
                 );
         Layer lyr = gjLoader.createLayerFromSource(qtmResourceFilePath);
+        this.currentlyLoadedQTMDataLayerName = qtmLayerName;
         lyr.setName(qtmLayerName);
         this.aF.getWwd().getModel().getLayers().add(lyr);
         // Move QTM layer to the top
         // this.aF.getWwd().getModel().getLayers().set(0,lyr);
+        System.out.println("loadBlankGeoJSON");
     }
 
     public void loadIncludedChoroplethGeoJSON(){
         AppGeoJSONLoader gjLoader = new AppGeoJSONLoader();
-        if (this.usingPreparedData == true){
-            String qtmResourceFilePath = String.format("out/resources/prepareddata/AfricaPopPlaces/qtmlvl%slonshft%s_agg.geojson",
-            String.valueOf(this.currentlySelectedQTMLevel),
-            String.valueOf(Double.valueOf(this.currentlySelectedLonShift))
-            );
+        String qtmResourceFilePath = String.format("out/resources/prepareddata/AfricaPopPlaces/qtmlvl%slonshft%s_agg.geojson",
+        String.valueOf(this.currentlySelectedQTMLevel),
+        String.valueOf(Double.valueOf(this.currentlySelectedLonShift)));
         Layer lyr = gjLoader.createLayerFromSource(qtmResourceFilePath);
         this.currentlyLoadedQTMDataLayerName = qtmLayerName + " Africa Populated Places";
         lyr.setName(this.currentlyLoadedQTMDataLayerName);
+        System.out.println("layer opacity: " + String.valueOf( lyr.getOpacity() ));
+        this.removeLayerByName(this.currentlyLoadedQTMDataLayerName);
         this.aF.getWwd().getModel().getLayers().add(lyr);
-        }
+        System.out.println("loadIncludedChoroplethGeoJSON");
     }
+
 
     public InputStream pathToInputStream(String path) throws IOException {
         File initialFile = new File(path);
@@ -259,27 +264,27 @@ public class App {
 
         System.out.println("Would be binning here.");
 
-        plotCSVPoints();
+        this.plotCSVPoints();
 
         // Change hasBinned to true, to change what we draw for GeoJSON polygons.
-        hasBinned = true;
+        this.hasBinned = true;
         this.aF.mainAppPanel.binningButton.setText("Done binning.");
 
-        triggerRedraw();
+        this.triggerRedraw();
 
     }
 
     public void resetAppState(){
         // Reset things to the state the app is in when first started up.
-        removeLayerByName(this.currentlyLoadedQTMDataLayerName);
-        removeDataPointsLayer();
-        csvFieldNames = null;
+        this.removeLayerByName(this.currentlyLoadedQTMDataLayerName);
+        this.removeDataPointsLayer();
+        this.csvFieldNames = null;
         this.cbModel = new DefaultComboBoxModel(); // A new empty DefaultComboBoxModel.
         this.userCSVFilePath = null;
         usingPreparedData = false;
-        hasBinned = false;
-        aF.mainAppPanel.resetAllBinningControls();
-        triggerRedraw();
+        this.hasBinned = false;
+        this.aF.mainAppPanel.resetAllBinningControls();
+        this.triggerRedraw();
     }
 
     /**
