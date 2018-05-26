@@ -86,6 +86,7 @@ public class App {
         removeLayerByName(this.currentlyLoadedQTMDataLayerName);
         if (hasBinned == true){
             if (usingPreparedData == true){
+                System.out.println("now using Africa prepared data.");
                 loadIncludedChoroplethGeoJSON();
             }else{
 //                loadChoroplethGeoJSON();
@@ -119,7 +120,7 @@ public class App {
     }
 
     public void setAttrToBin(String attribute){
-        attrToBin = attribute;
+        this.attrToBin = attribute;
     }
 
     public void receiveUserCSVPath(String aPath){

@@ -120,17 +120,21 @@ public class AppGeoJSONLoader
             throw new IllegalArgumentException(message);
         }
 
-        if (object.isGeometry())
+        if (object.isGeometry()) {
             this.addRenderableForGeometry(object.asGeometry(), layer, null);
-
-        else if (object.isFeature())
+            System.out.println("geometry");
+        }
+        else if (object.isFeature()) {
             this.addRenderableForFeature(object.asFeature(), layer);
-
-        else if (object.isFeatureCollection())
+            System.out.println("feature");
+        }
+        else if (object.isFeatureCollection()) {
             this.addRenderableForFeatureCollection(object.asFeatureCollection(), layer);
-
-        else
+            System.out.println("feturecollection");
+        }
+        else {
             this.handleUnrecognizedObject(object);
+        }
     }
 
     /**
@@ -244,6 +248,9 @@ public class AppGeoJSONLoader
 
         for (GeoJSONFeature feat : c.getFeatures())
         {
+            // This is getting called for each of our GeoJSON features (i.e., facets)
+            // To get at all the values per feature:
+            // System.out.println(feat.getProperties().getValues());
             this.addRenderableForFeature(feat, layer);
         }
     }

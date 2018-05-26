@@ -104,6 +104,7 @@ public class MainAppPanel extends JPanel{
                 // files.
                 File preparedDataCSVFile = new File("out/resources/prepareddata/AfricaPopPlaces/AfricaPopulatedPlacesForApp.csv");
                 String prepreparedDataPathString = preparedDataCSVFile.toPath().toString();
+                Main.app.hasBinned = true;
                 Main.app.usingPreparedData = true;
                 Main.app.receiveUserCSVPath(prepreparedDataPathString);
                 disableAllBinningControls();
