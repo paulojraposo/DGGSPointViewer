@@ -72,7 +72,7 @@ public class MainAppPanel extends JPanel{
     public MainAppPanel(){
 
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-        this.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3), new TitledBorder("foo")));
+        this.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3), new TitledBorder("")));
 
         // UT Logo
         logoPanel = new JPanel();
@@ -236,7 +236,7 @@ public class MainAppPanel extends JPanel{
         quantilesSlider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                Main.app.setCurrentlySelectedQuantileCount(quantilesSlider.getValue());
+                Main.app.currentlySelectedQuantileCount = quantilesSlider.getValue();
             }
         });
         classingAndMappingPanel.add(quantilesSlider);

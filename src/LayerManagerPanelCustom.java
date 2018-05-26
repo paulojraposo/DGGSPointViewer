@@ -93,14 +93,12 @@ public class LayerManagerPanelCustom extends JPanel
     public void update(WorldWindow wwd)
     {
         // Repopulate this layer manager.
-
         this.fill(wwd);
     }
 
     protected void fill(WorldWindow wwd)
     {
         // Populate this layer manager with an entry for each layer in the WorldWindow's layer list.
-
         if (this.isUpToDate(wwd))
             return;
 
@@ -126,18 +124,14 @@ public class LayerManagerPanelCustom extends JPanel
     {
         // Determines whether this layer manager's layer list is consistent with the specified WorldWindow's. Knowing
         // this prevents redundant updates.
-
         LayerList layerList = wwd.getModel().getLayers();
-
         if (this.layerPanels.size() != layerList.size())
             return false;
-
         for (int i = 0; i < layerList.size(); i++)
         {
             if (layerList.get(i) != this.layerPanels.get(i).getLayer())
                 return false;
         }
-
         return true;
     }
 

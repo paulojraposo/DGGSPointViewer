@@ -1,6 +1,5 @@
 import com.Ostermiller.util.CSVParser;
 import com.Ostermiller.util.LabeledCSVParser;
-import gov.nasa.worldwind.View;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.*;
@@ -10,7 +9,6 @@ import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.util.Logging;
 
 import javax.swing.*;
-import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -54,7 +52,7 @@ public class App {
     public int minQuantiles = 3;
     public int maxQuantiles = 7;
     public int defaultQuantileCount = 5;
-    private int currentlySelectedQuantileCount = defaultQuantileCount;
+    public int currentlySelectedQuantileCount = defaultQuantileCount;
 
     private String qtmLayerName = "QTM";
     private String currentlyLoadedQTMDataLayerName = qtmLayerName;

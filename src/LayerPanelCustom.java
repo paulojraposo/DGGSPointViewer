@@ -2,12 +2,7 @@ import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwindx.examples.layermanager.LayerManagerPanel;
 import javax.swing.*;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.TitledBorder;
 import java.awt.*;
-
-import static java.awt.BorderLayout.CENTER;
-
 
 public class LayerPanelCustom extends JPanel {
 
@@ -18,9 +13,6 @@ public class LayerPanelCustom extends JPanel {
         super(new BorderLayout(10, 10));
 
         LayerManagerPanelCustom lmP = new LayerManagerPanelCustom(wwd);
-//        CompoundBorder lB = new CompoundBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3), new TitledBorder("foo"));
-//        lmP.setBorder(lB);
-//        this.add(this.layerManagerPanel = new LayerManagerPanel(wwd), BorderLayout.CENTER);
         this.add(lmP, BorderLayout.CENTER);
 
         // Remove selected layers from app.
@@ -46,9 +38,6 @@ public class LayerPanelCustom extends JPanel {
             wwd.getModel().getLayers().remove(worldMapLayer);
 
         }
-//        CompoundBorder cB = new CompoundBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3), new TitledBorder("lotta layers"));
-//        this.setBorder(cB);
-
     }
 
     public void updateLayers(WorldWindow wwd)
@@ -56,5 +45,4 @@ public class LayerPanelCustom extends JPanel {
         this.layerManagerPanel.update(wwd);
 
     }
-
 }
