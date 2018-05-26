@@ -24,14 +24,14 @@ import java.util.List;
  * @author tag
  * @version $Id: LayerManagerPanel.java 2147 2014-07-11 23:29:45Z tgaskins $
  */
-public class LayerManagerPanelCustom extends JPanel
+public class AppLayerManagerPanel extends JPanel
 {
     protected JPanel layerNamesPanel;
     protected List<LayerPanel> layerPanels = new ArrayList<LayerPanel>();
     protected Font plainFont;
     protected Font boldFont;
 
-    public LayerManagerPanelCustom(final WorldWindow wwd)
+    public AppLayerManagerPanel(final WorldWindow wwd)
     {
         super(new BorderLayout(10, 10));
 

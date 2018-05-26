@@ -79,7 +79,7 @@ public class MainGUI
 
         protected AppPanel wwjPanel;
         protected JPanel controlPanel;
-        protected LayerPanelCustom layerPanel;
+        protected AppLayerPanelCustom layerPanel;
         protected StatisticsPanel statsPanel;
         protected MainAppPanel mainAppPanel;
 
@@ -112,7 +112,7 @@ public class MainGUI
                 this.controlPanel = new JPanel(new BorderLayout(10, 10));
                 this.mainAppPanel = new MainAppPanel();
                 this.controlPanel.add(this.mainAppPanel, BorderLayout.NORTH);
-                this.layerPanel = new LayerPanelCustom(this.getWwd());
+                this.layerPanel = new AppLayerPanelCustom(this.getWwd());
                 this.controlPanel.add(this.layerPanel, BorderLayout.CENTER);
                 FlatWorldPanel fwP = new FlatWorldPanel(this.getWwd());
                 CompoundBorder cB = new CompoundBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3), new TitledBorder("Globe or Projection"));
@@ -197,7 +197,7 @@ public class MainGUI
          * @deprecated Use getControlPanel instead.
          * @return This application's layer panel.
          */
-        public LayerPanelCustom getLayerPanel()
+        public AppLayerPanelCustom getLayerPanel()
         {
             return this.layerPanel;
         }

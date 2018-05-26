@@ -4,15 +4,15 @@ import gov.nasa.worldwindx.examples.layermanager.LayerManagerPanel;
 import javax.swing.*;
 import java.awt.*;
 
-public class LayerPanelCustom extends JPanel {
+public class AppLayerPanelCustom extends JPanel {
 
     protected LayerManagerPanel layerManagerPanel;
 
-    public LayerPanelCustom(WorldWindow wwd)
+    public AppLayerPanelCustom(WorldWindow wwd)
     {
         super(new BorderLayout(10, 10));
 
-        LayerManagerPanelCustom lmP = new LayerManagerPanelCustom(wwd);
+        AppLayerManagerPanel lmP = new AppLayerManagerPanel(wwd);
         this.add(lmP, BorderLayout.CENTER);
 
         // Remove selected layers from app.
