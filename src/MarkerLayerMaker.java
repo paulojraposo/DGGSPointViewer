@@ -6,6 +6,7 @@ import gov.nasa.worldwind.render.Material;
 import gov.nasa.worldwind.render.markers.*;
 import com.Ostermiller.util.LabeledCSVParser;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
@@ -38,6 +39,11 @@ public class MarkerLayerMaker {
                 Angle lonAngle = Angle.fromDegrees(lon);
                 LatLon ll = new LatLon(latAngle, lonAngle);
                 Marker marker = new BasicMarker(new Position(ll, 0.0), defaultMarkerAttributes);
+                BasicMarkerAttributes bmA = new BasicMarkerAttributes();
+                bmA.setMinMarkerSize(10000.0);
+                bmA.setMaxMarkerSize(35000.0);
+                bmA.setMaterial(new Material(Color.YELLOW));
+                marker.setAttributes(bmA);
                 markers.add(marker);
             }
         } catch (IOException e) {

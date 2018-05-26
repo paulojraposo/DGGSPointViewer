@@ -72,7 +72,7 @@ public class MainAppPanel extends JPanel{
     public MainAppPanel(){
 
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-        this.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(9, 9, 9, 9), new TitledBorder("MAUP Viewer")));
+        this.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3), new TitledBorder("foo")));
 
         // UT Logo
         logoPanel = new JPanel();

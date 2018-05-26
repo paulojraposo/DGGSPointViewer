@@ -15,6 +15,8 @@ import gov.nasa.worldwindx.examples.FlatWorldPanel;
 import gov.nasa.worldwindx.examples.util.*;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 
 
@@ -108,11 +110,14 @@ public class MainGUI
             if (includeLayerPanel)
             {
                 this.controlPanel = new JPanel(new BorderLayout(10, 10));
-                this.layerPanel = new LayerPanelCustom(this.getWwd());
                 this.mainAppPanel = new MainAppPanel();
                 this.controlPanel.add(this.mainAppPanel, BorderLayout.NORTH);
+                this.layerPanel = new LayerPanelCustom(this.getWwd());
                 this.controlPanel.add(this.layerPanel, BorderLayout.CENTER);
-                this.controlPanel.add(new FlatWorldPanel(this.getWwd()), BorderLayout.SOUTH);
+                FlatWorldPanel fwP = new FlatWorldPanel(this.getWwd());
+                CompoundBorder cB = new CompoundBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3), new TitledBorder("Globe or Projection"));
+                fwP.setBorder(cB);
+                this.controlPanel.add(fwP, BorderLayout.SOUTH);
                 this.getContentPane().add(this.controlPanel, BorderLayout.WEST);
             }
 
