@@ -236,7 +236,7 @@ public class MainAppPanel extends JPanel{
         quantilesSlider.addChangeListener(new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
-                Main.app.currentlySelectedQuantileCount = quantilesSlider.getValue();
+                Main.app.setCurrentlySelectedQuantileCount(quantilesSlider.getValue());
             }
         });
         classingAndMappingPanel.add(quantilesSlider);

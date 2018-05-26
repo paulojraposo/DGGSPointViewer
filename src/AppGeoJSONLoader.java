@@ -25,6 +25,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -146,6 +147,67 @@ public class AppGeoJSONLoader
         }
         else {
             this.handleUnrecognizedObject(object);
+        }
+    }
+
+    public void readDataByVariableNameFromSource(Object docSource){
+//        System.out.println("trying to work with " + String.valueOf(docSource));
+        Main.app.currentFacetsDataValues.clear();
+        GeoJSONDoc doc = null;
+
+        try
+        {
+            doc = new GeoJSONDoc(docSource);
+            doc.parse();
+
+            if (doc.getRootObject() instanceof GeoJSONObject){
+                GeoJSONObject thisGeoJSONObject =  (GeoJSONObject) doc.getRootObject();
+                // Assuming here that its a feature collection!
+                GeoJSONFeatureCollection thisGeoJSONFeatureCollection = thisGeoJSONObject.asFeatureCollection();
+                GeoJSONFeature[] features = thisGeoJSONFeatureCollection.getFeatures();
+                for (GeoJSONFeature feat : features){
+//                    System.out.println(String.valueOf(feat.getProperties().getEntries()));
+                    Double thisStat = (Double) feat.getProperties().getValue(Main.app.aggregatedStatOfInterest);
+//                    System.out.println("gonna be null?");
+//                    System.out.println(String.valueOf(thisStat));
+                    if (thisStat > 0.0) { // Add only if its more than zero, as zero facets we'll leave blank on the map.
+                        Main.app.currentFacetsDataValues.add(thisStat);
+//                        System.out.println("added a stat! " + String.valueOf(thisStat));
+                    }
+                }
+            }
+//            else if (doc.getRootObject() instanceof Object[])
+//            {
+//                for (Object o : (Object[]) doc.getRootObject())
+//                {
+//                    if (o instanceof GeoJSONObject)
+//                    {
+//                        this.addGeoJSONGeometryToLayer((GeoJSONObject) o, layer);
+//                        System.out.println("Wasn't GeoJSONObject");
+//                    }
+//                    else
+//                    {
+//                        this.handleUnrecognizedObject(o);
+//                    }
+//                }
+//            }
+//            else
+//            {
+//                this.handleUnrecognizedObject(doc.getRootObject());
+//            }
+        }
+        catch (IOException e)
+        {
+            String message = Logging.getMessage("generic.ExceptionAttemptingToReadGeoJSON", docSource);
+            Logging.logger().log(Level.SEVERE, message, e);
+            throw new WWRuntimeException(message, e);
+        }
+        finally
+        {
+            WWIO.closeStream(doc, docSource.toString());
+            // Remove all zero values - they're uninteresting for the classification.
+//            Main.app.currentFacetsDataValues.removeAll(Collections.singleton(0.0));
+            System.out.println(String.valueOf(Main.app.currentFacetsDataValues));
         }
     }
 
@@ -277,7 +339,7 @@ public class AppGeoJSONLoader
 //            } catch (Exception e) {
 //                e.printStackTrace();
 //            }
-            System.out.println("damn");
+//            System.out.println("damn");
 
             this.addRenderableForFeature(feat, layer);
         }
@@ -321,14 +383,14 @@ public class AppGeoJSONLoader
         ShapeAttributes attrs = this.createBlankPolygonAttributes();
         if (Main.app.hasBinned == true){
             if (Main.app.attrToBin != null){
-                Double thisMean = (Double) properties.getValue("Mean");
+                Double thisMean = (Double) properties.getValue(Main.app.aggregatedStatOfInterest);
 //                System.out.println(String.valueOf(thisMean));
                 if (thisMean > 0.0){
-                    System.out.println("tripped the if");
+//                    System.out.println("tripped the if");
                     attrs.setInteriorMaterial(new Material(Color.GREEN) );
                     attrs.setInteriorOpacity(1.0);
                     attrs.setDrawInterior(true);
-                    System.out.println(attrs.getInteriorOpacity());
+//                    System.out.println(attrs.getInteriorOpacity());
                 }
             }
         }
@@ -426,7 +488,7 @@ public class AppGeoJSONLoader
         }
         else
         {
-            System.out.println("Making SurfacePolygon");
+//            System.out.println("Making SurfacePolygon");
             SurfacePolygon poly = new SurfacePolygon(attrs, outerBoundary);
 
             if (innerBoundaries != null)

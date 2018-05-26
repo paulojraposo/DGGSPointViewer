@@ -16,6 +16,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static com.google.common.math.Quantiles.percentiles;
+
 public class App {
 
     private MainGUI mGUI;
@@ -67,6 +69,12 @@ public class App {
 
     public String colorRampChosen = orangesName;
 
+    public String aggregatedStatOfInterest = "Mean";
+
+    public ArrayList<Double> currentFacetsDataValues = new ArrayList<Double>();
+
+    public HashMap<Integer,Double> quantileIndexesByBreakIndex = new HashMap<Integer, Double>();
+
 
     public App(){
 
@@ -81,6 +89,7 @@ public class App {
     public void triggerRedraw(){
         // Remove the previous QTM layer and use the relevant GeoJSON loading method,
         // based on whether the user has binned yet.
+        this.quantileIndexesByBreakIndex.clear();
         removeLayerByName("QTM");
         removeLayerByName(this.currentlyLoadedQTMDataLayerName);
         if (hasBinned == true){
@@ -186,6 +195,30 @@ public class App {
         String qtmResourceFilePath = String.format("out/resources/prepareddata/AfricaPopPlaces/qtmlvl%slonshft%s_agg.geojson",
         String.valueOf(this.currentlySelectedQTMLevel),
         String.valueOf(Double.valueOf(this.currentlySelectedLonShift)));
+
+        // Read the data and determine quantiles
+        gjLoader.readDataByVariableNameFromSource(qtmResourceFilePath);
+        Double quantileInterval = 100.0 / this.currentlySelectedQuantileCount;
+        System.out.println("quantileInterval is " + String.valueOf(quantileInterval));
+//        ArrayList<Integer> quantileBreaks = new ArrayList<Integer>();
+        Integer thisQuantileBreak = quantileInterval.intValue();
+        for (int i = 0; i < this.currentlySelectedQuantileCount; i++){
+            thisQuantileBreak =  quantileInterval.intValue() * i ;
+            double thisPercentile = percentiles().index(thisQuantileBreak).compute(this.currentFacetsDataValues);
+            quantileIndexesByBreakIndex.put(thisQuantileBreak, thisPercentile);
+//            System.out.println("break and percentile :" + String.valueOf(thisQuantileBreak) + " " + String.valueOf(thisPercentile));
+        }
+        Integer lastQuantileBreak = 100;
+        double lastPercentile = percentiles().index(lastQuantileBreak).compute(this.currentFacetsDataValues);
+        this.quantileIndexesByBreakIndex.put(lastQuantileBreak, lastPercentile);
+//        System.out.println("break and percentile :" + String.valueOf(lastQuantileBreak) + " " + String.valueOf(lastPercentile));
+
+        // NB: The keySet() is unsorted; you'll have to sort them later if you need them sorted.
+        System.out.println("keys are: " + String.valueOf( this.quantileIndexesByBreakIndex.keySet()));
+        System.out.println("vals are: " + String.valueOf( this.quantileIndexesByBreakIndex.values()));
+
+
+
         Layer lyr = gjLoader.createLayerFromSource(qtmResourceFilePath);
         this.currentlyLoadedQTMDataLayerName = qtmLayerName + " Africa Populated Places";
         lyr.setName(this.currentlyLoadedQTMDataLayerName);
@@ -282,7 +315,9 @@ public class App {
         usingPreparedData = false;
         this.hasBinned = false;
         this.aF.mainAppPanel.resetAllBinningControls();
+        this.quantileIndexesByBreakIndex.clear();
         this.triggerRedraw();
+        this.currentFacetsDataValues.clear();
     }
 
     /**
