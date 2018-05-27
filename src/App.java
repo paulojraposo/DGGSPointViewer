@@ -14,7 +14,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 import static com.google.common.math.Quantiles.percentiles;
 
@@ -75,6 +77,10 @@ public class App {
 
     public HashMap<Integer,Double> quantileIndexesByBreakIndex = new HashMap<Integer, Double>();
 
+    public HashMap<Integer,ArrayList> quantileBoundsByIndex;
+
+    public ChoroplethManager choroplethManager;
+
 
     public App(){
 
@@ -84,6 +90,26 @@ public class App {
         this.mGUI = new MainGUI();
         this.aF = this.mGUI.start("Point Stats on a Discrete Global Grid", MainGUI.AppFrame.class);
         this.loadBlankGeoJSON();
+        this.choroplethManager = new ChoroplethManager();
+        this.quantileBoundsByIndex = new HashMap<Integer,ArrayList>();
+    }
+
+    public void determineQuantileBounds(){
+        this.quantileBoundsByIndex.clear();
+        List<Double> theValuesAsList = new ArrayList<Double>(this.quantileIndexesByBreakIndex.values());
+        Collections.sort(theValuesAsList); // sort ascending.
+        for (int i=0; i < Main.app.currentlySelectedQuantileCount ; i++){
+            Double thisLowerBound = theValuesAsList.get(i);
+            Double thisUpperBound = theValuesAsList.get(i+1);
+            ArrayList<Double> theseBounds = new ArrayList<Double>();
+            theseBounds.add(thisLowerBound);
+            theseBounds.add(thisUpperBound);
+            quantileBoundsByIndex.put(i, theseBounds);
+        }
+        for (ArrayList boundsList : this.quantileBoundsByIndex.values()){
+            System.out.println(String.valueOf(boundsList.get(0)));
+            System.out.println(String.valueOf(boundsList.get(1)));
+        }
     }
 
     public void triggerRedraw(){
@@ -196,7 +222,9 @@ public class App {
         String.valueOf(this.currentlySelectedQTMLevel),
         String.valueOf(Double.valueOf(this.currentlySelectedLonShift)));
 
-        // Read the data and determine quantiles
+        // Read the data and determine quantiles so we can use them to drive
+        // the appearance of the facets on the globe according to the attribute
+        // value we're interested in.
         gjLoader.readDataByVariableNameFromSource(qtmResourceFilePath);
         Double quantileInterval = 100.0 / this.currentlySelectedQuantileCount;
         System.out.println("quantileInterval is " + String.valueOf(quantileInterval));
@@ -217,12 +245,12 @@ public class App {
         System.out.println("keys are: " + String.valueOf( this.quantileIndexesByBreakIndex.keySet()));
         System.out.println("vals are: " + String.valueOf( this.quantileIndexesByBreakIndex.values()));
 
-
+        this.determineQuantileBounds();
 
         Layer lyr = gjLoader.createLayerFromSource(qtmResourceFilePath);
         this.currentlyLoadedQTMDataLayerName = qtmLayerName + " Africa Populated Places";
         lyr.setName(this.currentlyLoadedQTMDataLayerName);
-        System.out.println("layer opacity: " + String.valueOf( lyr.getOpacity() ));
+//        System.out.println("layer opacity: " + String.valueOf( lyr.getOpacity() ));
         this.removeLayerByName(this.currentlyLoadedQTMDataLayerName);
         this.aF.getWwd().getModel().getLayers().add(lyr);
         System.out.println("loadIncludedChoroplethGeoJSON");

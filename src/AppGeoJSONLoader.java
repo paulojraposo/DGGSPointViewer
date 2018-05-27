@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.logging.Level;
 
@@ -383,11 +384,22 @@ public class AppGeoJSONLoader
         ShapeAttributes attrs = this.createBlankPolygonAttributes();
         if (Main.app.hasBinned == true){
             if (Main.app.attrToBin != null){
-                Double thisMean = (Double) properties.getValue(Main.app.aggregatedStatOfInterest);
-//                System.out.println(String.valueOf(thisMean));
-                if (thisMean > 0.0){
+                Double thisStat = (Double) properties.getValue(Main.app.aggregatedStatOfInterest);
+//                System.out.println(String.valueOf(thisStat));
+                if (thisStat > 0.0){
 //                    System.out.println("tripped the if");
-                    attrs.setInteriorMaterial(new Material(Color.GREEN) );
+
+                    Integer thisClassIndex = Main.app.choroplethManager.getClassificationForValue(thisStat);
+
+                    ArrayList<String> s = (ArrayList) Main.app.choroplethManager.colorHM.get(Main.app.colorRampChosen).get(Main.app.currentlySelectedQuantileCount);
+                    System.out.println(s);
+//                    HashMap<String,HashMap> colorListsByQuantileCount = Main.app.choroplethManager.colorHM.get(Main.app.colorRampChosen);
+//                    HashMap<Integer,ArrayList> color_Shades = colorListsByQuantileCount.get(Main.app.currentlySelectedQuantileCount);
+//                    ArrayList hexString = color_Shades.get(thisClassIndex);
+//                    hexString.get(1);
+                    attrs.setInteriorMaterial(new Material(Color.decode(s.get(thisClassIndex))));
+
+//                    attrs.setInteriorMaterial(new Material(Color.GREEN) );
                     attrs.setInteriorOpacity(1.0);
                     attrs.setDrawInterior(true);
 //                    System.out.println(attrs.getInteriorOpacity());
