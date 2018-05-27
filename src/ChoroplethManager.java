@@ -16,9 +16,9 @@ public class ChoroplethManager {
     public ArrayList<String> purple6 = new ArrayList<String>();
     public ArrayList<String> purple7 = new ArrayList<String>();
 
-    public HashMap<String,HashMap> colorHM;// = new HashMap<String,HashMap>();
-    public HashMap<Integer,ArrayList> orangeShadesByClassNumber;// = new HashMap<Integer,ArrayList>();
-    public HashMap<Integer,ArrayList> purpleShadesByClassNumber;//
+    public HashMap<String,HashMap> colorHM;
+    public HashMap<Integer,ArrayList> orangeShadesByClassNumber;
+    public HashMap<Integer,ArrayList> purpleShadesByClassNumber;
 
     public ChoroplethManager() {
 
@@ -124,19 +124,19 @@ public class ChoroplethManager {
         List<Integer> theKeysAsList = new ArrayList<Integer>(theKeys);
         Collections.sort(theKeysAsList);
 
-        System.out.println(String.valueOf(theKeysAsList));
+//        System.out.println(String.valueOf(theKeysAsList));
 
         if (aValue > 0.0){
             for (int i=0; i<theKeysAsList.size();i++){
                 ArrayList<Double> bounds = Main.app.quantileBoundsByIndex.get(i);
                 Double thisLowerBound = bounds.get(0);
                 Double thisUpperBound = bounds.get(1);
-                System.out.println("i is "+ String.valueOf(i));
-                System.out.println("aValue is " + String.valueOf(aValue));
-                System.out.println("lower bound: " + String.valueOf(thisLowerBound));
-                System.out.println("upper bound: " + String.valueOf(thisUpperBound));
+//                System.out.println("i is "+ String.valueOf(i));
+//                System.out.println("aValue is " + String.valueOf(aValue));
+//                System.out.println("lower bound: " + String.valueOf(thisLowerBound));
+//                System.out.println("upper bound: " + String.valueOf(thisUpperBound));
                 if ((aValue >= thisLowerBound) && (aValue <= thisUpperBound)){
-                    System.out.println("returning " + String.valueOf(i));
+//                    System.out.println("returning " + String.valueOf(i));
                     return i;
                 }
             }

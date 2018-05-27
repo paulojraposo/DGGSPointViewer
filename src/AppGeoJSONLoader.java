@@ -79,7 +79,7 @@ public class AppGeoJSONLoader
             if (doc.getRootObject() instanceof GeoJSONObject)
             {
                 this.addGeoJSONGeometryToLayer((GeoJSONObject) doc.getRootObject(), layer);
-                System.out.println("was GeoJSONObject");
+//                System.out.println("was GeoJSONObject");
             }
             else if (doc.getRootObject() instanceof Object[])
             {
@@ -144,7 +144,7 @@ public class AppGeoJSONLoader
         }
         else if (object.isFeatureCollection()) {
             this.addRenderableForFeatureCollection(object.asFeatureCollection(), layer);
-            System.out.println("feturecollection");
+//            System.out.println("feturecollection");
         }
         else {
             this.handleUnrecognizedObject(object);
@@ -207,8 +207,8 @@ public class AppGeoJSONLoader
         {
             WWIO.closeStream(doc, docSource.toString());
             // Remove all zero values - they're uninteresting for the classification.
-//            Main.app.currentFacetsDataValues.removeAll(Collections.singleton(0.0));
-            System.out.println(String.valueOf(Main.app.currentFacetsDataValues));
+            // Main.app.currentFacetsDataValues.removeAll(Collections.singleton(0.0));
+            // System.out.println(String.valueOf(Main.app.currentFacetsDataValues));
         }
     }
 
@@ -268,12 +268,6 @@ public class AppGeoJSONLoader
 
     protected void addRenderableForGeometry(GeoJSONGeometry geom, RenderableLayer layer, AVList properties)
     {
-        // Getting at the attributes for this feature:
-        Set entries =properties.getEntries();
-//        System.out.println(String.valueOf(entries));
-
-//        Double val = (Double) properties.getValue(Main.app.attrToBin);
-//        System.out.println("value of " + Main.app.attrToBin + " is " + String.valueOf(val));
 
         if (geom.isPoint()) {
             this.addRenderableForPoint(geom.asPoint(), layer, properties);
@@ -332,16 +326,7 @@ public class AppGeoJSONLoader
 
         for (GeoJSONFeature feat : c.getFeatures())
         {
-            // This is getting called for each of our GeoJSON features (i.e., facets)
-            // To get at all the values per feature:
-            // System.out.println(feat.getProperties().getValues());
-//            try{
-//                feat.getProperties().getValue(Main.app.attrToBin);
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//            System.out.println("damn");
-
+            // This is getting called for each of our GeoJSON features (i.e., facets).
             this.addRenderableForFeature(feat, layer);
         }
     }
@@ -391,18 +376,11 @@ public class AppGeoJSONLoader
 
                     Integer thisClassIndex = Main.app.choroplethManager.getClassificationForValue(thisStat);
 
-                    ArrayList<String> s = (ArrayList) Main.app.choroplethManager.colorHM.get(Main.app.colorRampChosen).get(Main.app.currentlySelectedQuantileCount);
-                    System.out.println(s);
-//                    HashMap<String,HashMap> colorListsByQuantileCount = Main.app.choroplethManager.colorHM.get(Main.app.colorRampChosen);
-//                    HashMap<Integer,ArrayList> color_Shades = colorListsByQuantileCount.get(Main.app.currentlySelectedQuantileCount);
-//                    ArrayList hexString = color_Shades.get(thisClassIndex);
-//                    hexString.get(1);
-                    attrs.setInteriorMaterial(new Material(Color.decode(s.get(thisClassIndex))));
-
-//                    attrs.setInteriorMaterial(new Material(Color.GREEN) );
-                    attrs.setInteriorOpacity(1.0);
-                    attrs.setDrawInterior(true);
-//                    System.out.println(attrs.getInteriorOpacity());
+                    ArrayList<String> shades = (ArrayList) Main.app.choroplethManager.colorHM.get(Main.app.colorRampChosen).get(Main.app.currentlySelectedQuantileCount);
+//                    System.out.println(s);
+                    attrs.setInteriorMaterial(new Material(Color.decode(shades.get(thisClassIndex))));
+                    attrs.setInteriorOpacity(0.7);
+//                    attrs.setDrawInterior(true);
                 }
             }
         }
@@ -587,9 +565,6 @@ public class AppGeoJSONLoader
             attrs = randomAttrs.nextAttributes().asShapeAttributes();
             layer.setValue(key, attrs);
         }
-
-//        attrs.setOutlineMaterial(new Material(Color.WHITE));
-//        attrs.setInteriorOpacity(0.0);
 
         return attrs;
     }

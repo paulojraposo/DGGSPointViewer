@@ -104,11 +104,11 @@ public class App {
             ArrayList<Double> theseBounds = new ArrayList<Double>();
             theseBounds.add(thisLowerBound);
             theseBounds.add(thisUpperBound);
-            quantileBoundsByIndex.put(i, theseBounds);
+            this.quantileBoundsByIndex.put(i, theseBounds);
         }
         for (ArrayList boundsList : this.quantileBoundsByIndex.values()){
-            System.out.println(String.valueOf(boundsList.get(0)));
-            System.out.println(String.valueOf(boundsList.get(1)));
+//            System.out.println(String.valueOf(boundsList.get(0)));
+//            System.out.println(String.valueOf(boundsList.get(1)));
         }
     }
 
@@ -120,19 +120,20 @@ public class App {
         removeLayerByName(this.currentlyLoadedQTMDataLayerName);
         if (hasBinned == true){
             if (usingPreparedData == true){
-                System.out.println("now using Africa prepared data.");
+//                System.out.println("now using Africa prepared data.");
                 loadIncludedChoroplethGeoJSON();
             }else{
 //                loadChoroplethGeoJSON();
             }
         }else {
-            System.out.println("loading blank geojson");
+//            System.out.println("loading blank geojson");
             loadBlankGeoJSON();
         }
     }
 
     public void setColorRampChosen(String colorRampName){
         this.colorRampChosen = colorRampName;
+        triggerRedraw();
     }
 
     public void setCurrentQTMDrawingLevel(Integer lvl){
@@ -213,7 +214,7 @@ public class App {
         this.aF.getWwd().getModel().getLayers().add(lyr);
         // Move QTM layer to the top
         // this.aF.getWwd().getModel().getLayers().set(0,lyr);
-        System.out.println("loadBlankGeoJSON");
+//        System.out.println("loadBlankGeoJSON");
     }
 
     public void loadIncludedChoroplethGeoJSON(){
@@ -227,7 +228,7 @@ public class App {
         // value we're interested in.
         gjLoader.readDataByVariableNameFromSource(qtmResourceFilePath);
         Double quantileInterval = 100.0 / this.currentlySelectedQuantileCount;
-        System.out.println("quantileInterval is " + String.valueOf(quantileInterval));
+//        System.out.println("quantileInterval is " + String.valueOf(quantileInterval));
 //        ArrayList<Integer> quantileBreaks = new ArrayList<Integer>();
         Integer thisQuantileBreak = quantileInterval.intValue();
         for (int i = 0; i < this.currentlySelectedQuantileCount; i++){
@@ -242,8 +243,8 @@ public class App {
 //        System.out.println("break and percentile :" + String.valueOf(lastQuantileBreak) + " " + String.valueOf(lastPercentile));
 
         // NB: The keySet() is unsorted; you'll have to sort them later if you need them sorted.
-        System.out.println("keys are: " + String.valueOf( this.quantileIndexesByBreakIndex.keySet()));
-        System.out.println("vals are: " + String.valueOf( this.quantileIndexesByBreakIndex.values()));
+//        System.out.println("keys are: " + String.valueOf( this.quantileIndexesByBreakIndex.keySet()));
+//        System.out.println("vals are: " + String.valueOf( this.quantileIndexesByBreakIndex.values()));
 
         this.determineQuantileBounds();
 
@@ -253,7 +254,7 @@ public class App {
 //        System.out.println("layer opacity: " + String.valueOf( lyr.getOpacity() ));
         this.removeLayerByName(this.currentlyLoadedQTMDataLayerName);
         this.aF.getWwd().getModel().getLayers().add(lyr);
-        System.out.println("loadIncludedChoroplethGeoJSON");
+//        System.out.println("loadIncludedChoroplethGeoJSON");
     }
 
 
@@ -321,7 +322,7 @@ public class App {
         // location on the user's disk, to be selectable as layers to
         // load onto the globe.
 
-        System.out.println("Would be binning here.");
+//        System.out.println("Would be binning here.");
 
         this.plotCSVPoints();
 
