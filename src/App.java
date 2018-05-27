@@ -347,6 +347,7 @@ public class App {
         this.quantileIndexesByBreakIndex.clear();
         this.triggerRedraw();
         this.currentFacetsDataValues.clear();
+        this.aF.mainAppPanel.disableExportButtons();
     }
 
     /**

@@ -35,6 +35,8 @@ public class MainAppPanel extends JPanel{
     JLabel progressMessage;
     String binningButtonText = "Plot & Run Binning";
     JButton binningButton; // Change the text of this when processing to tell the user.
+    JButton exportSingleGeoJSONButton;
+    JButton exportAllGeoJSONButton;
 
     // MAUP panel
     JPanel maupPanel;
@@ -44,8 +46,6 @@ public class MainAppPanel extends JPanel{
     JSlider EWTranslateSlider;
     JLabel exportGeoJSONLabel;
     JPanel exportGeoJSONPanel;
-    JButton exportSingleGeoJSONButton;
-    JButton exportAllGeoJSONButton;
 
     // Classification and Mapping panel
     JPanel classingAndMappingPanel;
@@ -86,7 +86,7 @@ public class MainAppPanel extends JPanel{
         binningPanel = new JPanel();
         bBinningTitled = BorderFactory.createTitledBorder(bGreyLine, "Data Input and Binning", TitledBorder.LEFT,  TitledBorder.TOP, null, Color.gray);
         binningPanel.setBorder(bBinningTitled);
-        binningPanel.setLayout(new GridLayout(4,2));
+        binningPanel.setLayout(new GridLayout(5,2));
         chooseFileLabel = new JLabel("Input CSV:");
         binningPanel.add(chooseFileLabel);
         dataLoadingButtonsPanel = new JPanel();
@@ -109,6 +109,7 @@ public class MainAppPanel extends JPanel{
                 Main.app.receiveUserCSVPath(prepreparedDataPathString);
                 disableAllBinningControls();
                 Main.app.performBinning();
+                enableExportButtons();
             }
         });
         dataLoadingButtonsPanel.add(usePreparedDataButton);
@@ -171,17 +172,30 @@ public class MainAppPanel extends JPanel{
                     System.out.println(ex);
                 }
                 disableAllBinningControls();
+                exportSingleGeoJSONButton.setEnabled(true);
+                exportAllGeoJSONButton.setEnabled(true);
                 Main.app.performBinning();
             }
         } );
         binningPanel.add(binningButton);
+        exportGeoJSONLabel = new JLabel("Export to GeoJSON:");
+        binningPanel.add(exportGeoJSONLabel);
+        exportGeoJSONPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+//        exportGeoJSONPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        exportSingleGeoJSONButton = new JButton("This permutation");
+        exportAllGeoJSONButton = new JButton("All");
+        exportGeoJSONPanel.add(exportSingleGeoJSONButton);
+        exportSingleGeoJSONButton.setEnabled(false); // These start disabled, nothing to export yet.
+        exportAllGeoJSONButton.setEnabled(false);    //
+        exportGeoJSONPanel.add(exportAllGeoJSONButton);
+        binningPanel.add(exportGeoJSONPanel);
         this.add(binningPanel);
 
         // MAUP panel
         maupPanel = new JPanel();
         bMAUPTitled = BorderFactory.createTitledBorder(bGreyLine, "Modifiable Areal Units", TitledBorder.LEFT,  TitledBorder.TOP, null, Color.black);
         maupPanel.setBorder(bMAUPTitled);
-        maupPanel.setLayout(new GridLayout(3,2));
+        maupPanel.setLayout(new GridLayout(2,2));
         levelLabel = new JLabel("<html><b>Scaling</b> (QTM level to draw):</html>");
         maupPanel.add(levelLabel);
         levelSlider = new JSlider(Main.app.minQTMLevel, Main.app.maxQTMLevels, Main.app.defaultQTMLevel);
@@ -210,14 +224,6 @@ public class MainAppPanel extends JPanel{
             }
         });
         maupPanel.add(EWTranslateSlider);
-        exportGeoJSONLabel = new JLabel("Export to GeoJSON:");
-        maupPanel.add(exportGeoJSONLabel);
-        exportGeoJSONPanel = new JPanel();
-        exportSingleGeoJSONButton = new JButton("This permutation");
-        exportAllGeoJSONButton = new JButton("All");
-        exportGeoJSONPanel.add(exportSingleGeoJSONButton);
-        exportGeoJSONPanel.add(exportAllGeoJSONButton);
-        maupPanel.add(exportGeoJSONPanel);
         this.add(maupPanel);
 
         // Classing and Mapping Panel
@@ -270,7 +276,7 @@ public class MainAppPanel extends JPanel{
 
         // TODO: add legend.
 
-
+        // Clear and Reset Panel
         clearAndResetPanel = new JPanel();
         GridLayout clearAndResetPanelLayout = new GridLayout(1,2);
         clearAndResetPanel.setLayout(clearAndResetPanelLayout);
@@ -303,6 +309,16 @@ public class MainAppPanel extends JPanel{
         this.levelIntersectionCalculationCB.setEnabled(false);
         this.attrToBinCB.setEnabled(false);
         this.binningButton.setEnabled(false);
+    }
+
+    public void disableExportButtons(){
+        this.exportAllGeoJSONButton.setEnabled(false);
+        this.exportSingleGeoJSONButton.setEnabled(false);
+    }
+
+    public void enableExportButtons(){
+        this.exportSingleGeoJSONButton.setEnabled(true);
+        this.exportAllGeoJSONButton.setEnabled(true);
     }
 
     public void resetAllBinningControls(){
