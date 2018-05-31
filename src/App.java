@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -69,7 +70,7 @@ public class App {
     public String orangesName = "oranges";
     public String purplesName = "purples";
 
-    public String colorRampChosen = orangesName;
+    public String currentColorRampChosen = orangesName;
 
     public String aggregatedStatOfInterest = "Mean";
 
@@ -92,6 +93,9 @@ public class App {
         this.loadBlankGeoJSON();
         this.choroplethManager = new ChoroplethManager();
         this.quantileBoundsByIndex = new HashMap<Integer,ArrayList>();
+        HashMap<Integer,ArrayList> hm = this.choroplethManager.colorHM.get(this.currentColorRampChosen);
+        ArrayList<String> colorsAL = hm.get(this.currentlySelectedQuantileCount);
+        this.aF.mainAppPanel.legendPanel.refreshLegend(colorsAL);
     }
 
     public void determineQuantileBounds(){
@@ -129,10 +133,16 @@ public class App {
 //            System.out.println("loading blank geojson");
             loadBlankGeoJSON();
         }
+
+        HashMap<Integer,ArrayList> hm = this.choroplethManager.colorHM.get(this.currentColorRampChosen);
+        ArrayList<String> colorsAL = hm.get(this.currentlySelectedQuantileCount);
+        this.aF.mainAppPanel.legendPanel.refreshLegend(colorsAL);
+        this.aF.mainAppPanel.validate();
+        this.aF.mainAppPanel.repaint();
     }
 
-    public void setColorRampChosen(String colorRampName){
-        this.colorRampChosen = colorRampName;
+    public void setCurrentColorRampChosen(String colorRampName){
+        this.currentColorRampChosen = colorRampName;
         triggerRedraw();
     }
 

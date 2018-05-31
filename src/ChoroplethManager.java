@@ -1,4 +1,8 @@
+import javax.swing.*;
+import java.awt.*;
+import java.lang.reflect.Array;
 import java.util.*;
+import java.util.List;
 
 public class ChoroplethManager {
 
@@ -111,6 +115,29 @@ public class ChoroplethManager {
 //        HashMap someShades = aColorHashMap.get(shadesCount);
 //        String hexString = (String) someShades.get(1);
 //        return someShades;
+//    }
+
+//    public JPanel buildLegend(Integer classCount, String colorUsed){
+//
+//        JPanel productPanel = new JPanel();
+//
+//        // Will do color swatches as JLabels that load icons.
+//        ArrayList<JLabel> colorPatches = new ArrayList<JLabel>();
+//        for (int i=0; i<classCount; i++) {
+//            JLabel aLabel = new JLabel(String.valueOf(i));
+//            HashMap<Integer, String> theColorsByCount = this.colorHM.get(colorUsed);
+//            Object theColors = theColorsByCount.get(classCount);
+//            ArrayList<String> theColorsAL = (ArrayList<String>) theColors;
+//            System.out.println(theColors);
+//            aLabel.setForeground(Color.decode(theColorsAL.get(i)));
+//            colorPatches.add(aLabel);
+//        }
+//
+//        for (JLabel cPatch : colorPatches) {
+//            productPanel.add(cPatch);
+//        }
+//
+//        return productPanel;
 //    }
 
     public Integer getClassificationForValue(Double aValue){

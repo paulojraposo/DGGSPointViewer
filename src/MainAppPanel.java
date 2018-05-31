@@ -57,6 +57,8 @@ public class MainAppPanel extends JPanel{
     //        };
     JLabel quantilesLabel;
     JSlider quantilesSlider;
+    JLabel dummyLegendLabel;
+    AppLegend legendPanel;
     JPanel colorRadioButtonsPanel;
     JRadioButton orangesRB;
     JRadioButton purplesRB;
@@ -230,7 +232,7 @@ public class MainAppPanel extends JPanel{
         classingAndMappingPanel = new JPanel();
         bClassificationTitled = BorderFactory.createTitledBorder(bGreyLine, "Visualization", TitledBorder.LEFT, TitledBorder.TOP, null, Color.black);
         classingAndMappingPanel.setBorder(bClassificationTitled);
-        GridLayout binningPanelLayout = new GridLayout(2,2);
+        GridLayout binningPanelLayout = new GridLayout(3,2);
         classingAndMappingPanel.setLayout(binningPanelLayout);
         quantilesLabel = new JLabel("Quantiles:");
         classingAndMappingPanel.add(quantilesLabel);
@@ -246,6 +248,11 @@ public class MainAppPanel extends JPanel{
             }
         });
         classingAndMappingPanel.add(quantilesSlider);
+
+        dummyLegendLabel = new JLabel("");
+        classingAndMappingPanel.add(dummyLegendLabel);
+        legendPanel = new AppLegend();
+        classingAndMappingPanel.add(legendPanel);
         colorLabel = new JLabel("Choropleth color ramp:");
         classingAndMappingPanel.add(colorLabel);
         colorRadioButtonsPanel = new JPanel();
@@ -254,14 +261,14 @@ public class MainAppPanel extends JPanel{
         orangesRB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                Main.app.setColorRampChosen(Main.app.orangesName);
+                Main.app.setCurrentColorRampChosen(Main.app.orangesName);
             }
         });
         purplesRB = new JRadioButton(Main.app.purplesName);
         purplesRB.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
-                Main.app.setColorRampChosen(Main.app.purplesName);
+                Main.app.setCurrentColorRampChosen(Main.app.purplesName);
             }
         });
         colorRBGroup = new ButtonGroup();

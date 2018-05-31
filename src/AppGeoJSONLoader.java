@@ -5,7 +5,6 @@
  */
 //package gov.nasa.worldwindx.examples;
 
-import com.google.common.math.Quantiles;
 import gov.nasa.worldwind.WorldWind;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.avlist.AVList;
@@ -23,14 +22,8 @@ import gov.nasa.worldwindx.examples.util.RandomShapeAttributes;
 
 import java.awt.*;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Set;
 import java.util.logging.Level;
-
-import static com.google.common.math.Quantiles.percentiles;
 
 /**
  * Utility class to load data from a GeoJSON source into a layer.
@@ -376,7 +369,7 @@ public class AppGeoJSONLoader
 
                     Integer thisClassIndex = Main.app.choroplethManager.getClassificationForValue(thisStat);
 
-                    ArrayList<String> shades = (ArrayList) Main.app.choroplethManager.colorHM.get(Main.app.colorRampChosen).get(Main.app.currentlySelectedQuantileCount);
+                    ArrayList<String> shades = (ArrayList) Main.app.choroplethManager.colorHM.get(Main.app.currentColorRampChosen).get(Main.app.currentlySelectedQuantileCount);
 //                    System.out.println(s);
                     attrs.setInteriorMaterial(new Material(Color.decode(shades.get(thisClassIndex))));
                     attrs.setInteriorOpacity(0.7);
