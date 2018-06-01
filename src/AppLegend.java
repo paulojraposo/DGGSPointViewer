@@ -1,5 +1,3 @@
-import javafx.geometry.Rectangle2D;
-
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;

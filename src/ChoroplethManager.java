@@ -1,12 +1,7 @@
-import javax.swing.*;
-import java.awt.*;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.List;
 
 public class ChoroplethManager {
-
-    // Good old colorbrewer.org!
 
     public ArrayList<String> orange3 = new ArrayList<String>();
     public ArrayList<String> orange4 = new ArrayList<String>();
@@ -31,6 +26,7 @@ public class ChoroplethManager {
         this.purpleShadesByClassNumber = new HashMap<Integer,ArrayList>();
 
         // Build the color look up.
+        // Good old colorbrewer.org!
 
         this.orange3.add("#fee6ce");
         this.orange3.add("#fdae6b");
@@ -109,37 +105,6 @@ public class ChoroplethManager {
 
     }
 
-//    public ArrayList<String> getColorSet(String hue, Integer shadesCount){
-//        // A way to get the list of colors by specifying which hue and how many shades wanted.
-//        HashMap<Integer,HashMap> aColorHashMap = this.colorHM.get(hue);
-//        HashMap someShades = aColorHashMap.get(shadesCount);
-//        String hexString = (String) someShades.get(1);
-//        return someShades;
-//    }
-
-//    public JPanel buildLegend(Integer classCount, String colorUsed){
-//
-//        JPanel productPanel = new JPanel();
-//
-//        // Will do color swatches as JLabels that load icons.
-//        ArrayList<JLabel> colorPatches = new ArrayList<JLabel>();
-//        for (int i=0; i<classCount; i++) {
-//            JLabel aLabel = new JLabel(String.valueOf(i));
-//            HashMap<Integer, String> theColorsByCount = this.colorHM.get(colorUsed);
-//            Object theColors = theColorsByCount.get(classCount);
-//            ArrayList<String> theColorsAL = (ArrayList<String>) theColors;
-//            System.out.println(theColors);
-//            aLabel.setForeground(Color.decode(theColorsAL.get(i)));
-//            colorPatches.add(aLabel);
-//        }
-//
-//        for (JLabel cPatch : colorPatches) {
-//            productPanel.add(cPatch);
-//        }
-//
-//        return productPanel;
-//    }
-
     public Integer getClassificationForValue(Double aValue){
         // Given a number, determine which quantile it falls into,
         // espressed as an integer, with 0 being the first of however
@@ -151,19 +116,12 @@ public class ChoroplethManager {
         List<Integer> theKeysAsList = new ArrayList<Integer>(theKeys);
         Collections.sort(theKeysAsList);
 
-//        System.out.println(String.valueOf(theKeysAsList));
-
         if (aValue > 0.0){
             for (int i=0; i<theKeysAsList.size();i++){
                 ArrayList<Double> bounds = Main.app.quantileBoundsByIndex.get(i);
                 Double thisLowerBound = bounds.get(0);
                 Double thisUpperBound = bounds.get(1);
-//                System.out.println("i is "+ String.valueOf(i));
-//                System.out.println("aValue is " + String.valueOf(aValue));
-//                System.out.println("lower bound: " + String.valueOf(thisLowerBound));
-//                System.out.println("upper bound: " + String.valueOf(thisUpperBound));
                 if ((aValue >= thisLowerBound) && (aValue <= thisUpperBound)){
-//                    System.out.println("returning " + String.valueOf(i));
                     return i;
                 }
             }

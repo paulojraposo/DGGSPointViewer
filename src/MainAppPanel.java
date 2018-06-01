@@ -17,7 +17,6 @@ public class MainAppPanel extends JPanel{
     Border bBinningTitled;
     Border bMAUPTitled;
     Border bClassificationTitled;
-    Border bClearAndReset;
     JPanel logoPanel;
     JLabel logoLabel;
 
@@ -50,11 +49,6 @@ public class MainAppPanel extends JPanel{
     // Classification and Mapping panel
     JPanel classingAndMappingPanel;
     JLabel colorLabel;
-    // JComboBox colorCB;
-    // ImageIcon[] colorOptions = {
-    //        new ImageIcon("out/resources/orangesthumbnail.png"),
-    //        new ImageIcon("out/resources/purplesthumbnail.png")
-    //        };
     JLabel quantilesLabel;
     JSlider quantilesSlider;
     JLabel dummyLegendLabel;
@@ -183,7 +177,6 @@ public class MainAppPanel extends JPanel{
         exportGeoJSONLabel = new JLabel("Export to GeoJSON:");
         binningPanel.add(exportGeoJSONLabel);
         exportGeoJSONPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
-//        exportGeoJSONPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         exportSingleGeoJSONButton = new JButton("This permutation");
         exportAllGeoJSONButton = new JButton("All");
         exportGeoJSONPanel.add(exportSingleGeoJSONButton);
@@ -256,7 +249,8 @@ public class MainAppPanel extends JPanel{
         colorLabel = new JLabel("Choropleth color ramp:");
         classingAndMappingPanel.add(colorLabel);
         colorRadioButtonsPanel = new JPanel();
-        colorRadioButtonsPanel.setLayout(new BoxLayout(colorRadioButtonsPanel, BoxLayout.LINE_AXIS));
+        colorRadioButtonsPanel.setLayout(new GridBagLayout());
+//        colorRadioButtonsPanel.setLayout(new BoxLayout(colorRadioButtonsPanel, BoxLayout.LINE_AXIS));
         orangesRB = new JRadioButton(Main.app.orangesName);
         orangesRB.addActionListener(new ActionListener() {
             @Override
@@ -280,8 +274,6 @@ public class MainAppPanel extends JPanel{
         colorRadioButtonsPanel.add(purplesRB);
         classingAndMappingPanel.add(colorRadioButtonsPanel);
         this.add(classingAndMappingPanel);
-
-        // TODO: add legend.
 
         // Clear and Reset Panel
         clearAndResetPanel = new JPanel();
