@@ -1,3 +1,5 @@
+import gov.nasa.worldwindx.examples.FlatWorldPanel;
+
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -57,6 +59,8 @@ public class MainAppPanel extends JPanel{
     JRadioButton orangesRB;
     JRadioButton purplesRB;
     ButtonGroup colorRBGroup;
+    JPanel projectionCBPanel;
+    JComboBox<String> projectionsOptionsCB;
 
     // Clear and reset panel;
     JPanel clearAndResetPanel;
@@ -225,7 +229,7 @@ public class MainAppPanel extends JPanel{
         classingAndMappingPanel = new JPanel();
         bClassificationTitled = BorderFactory.createTitledBorder(bGreyLine, "Visualization", TitledBorder.LEFT, TitledBorder.TOP, null, Color.black);
         classingAndMappingPanel.setBorder(bClassificationTitled);
-        GridLayout binningPanelLayout = new GridLayout(3,2);
+        GridLayout binningPanelLayout = new GridLayout(4,2);
         classingAndMappingPanel.setLayout(binningPanelLayout);
         quantilesLabel = new JLabel("Quantiles:");
         classingAndMappingPanel.add(quantilesLabel);
@@ -273,6 +277,24 @@ public class MainAppPanel extends JPanel{
         colorRadioButtonsPanel.add(Box.createRigidArea(new Dimension(7,0)));
         colorRadioButtonsPanel.add(purplesRB);
         classingAndMappingPanel.add(colorRadioButtonsPanel);
+
+        classingAndMappingPanel.add(new JLabel("Projection:"));
+        this.projectionCBPanel = new JPanel(new GridBagLayout());
+        // TODO: set options here for globe and map projections.
+        this.projectionsOptionsCB = new JComboBox<String>();
+        String[] projectionOptionsTextArray = {"Globe", "Map"};
+        DefaultComboBoxModel projectionsCBModel = new DefaultComboBoxModel(projectionOptionsTextArray);
+        this.projectionsOptionsCB.setModel(projectionsCBModel);
+        ((JLabel) this.projectionsOptionsCB.getRenderer()).setHorizontalAlignment(SwingConstants.CENTER);
+        attrToBinCB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String attr = attrToBinCB.getSelectedItem().toString();
+                // TODO: write me!
+            }
+        } );
+        this.projectionCBPanel.add(this.projectionsOptionsCB);
+        classingAndMappingPanel.add(this.projectionCBPanel);
         this.add(classingAndMappingPanel);
 
         // Clear and Reset Panel

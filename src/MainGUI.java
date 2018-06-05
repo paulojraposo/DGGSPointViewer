@@ -114,10 +114,10 @@ public class MainGUI
                 this.controlPanel.add(this.mainAppPanel, BorderLayout.NORTH);
                 this.layerPanel = new AppLayerPanelCustom(this.getWwd());
                 this.controlPanel.add(this.layerPanel, BorderLayout.CENTER);
-                FlatWorldPanel fwP = new FlatWorldPanel(this.getWwd());
-                CompoundBorder cB = new CompoundBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3), new TitledBorder("Globe or Projection"));
-                fwP.setBorder(cB);
-                this.controlPanel.add(fwP, BorderLayout.SOUTH);
+//                FlatWorldPanel fwP = new FlatWorldPanel(this.getWwd());
+//                CompoundBorder cB = new CompoundBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3), new TitledBorder("Globe or Projection"));
+//                fwP.setBorder(cB);
+//                this.controlPanel.add(fwP, BorderLayout.SOUTH);
                 this.getContentPane().add(this.controlPanel, BorderLayout.WEST);
             }
 

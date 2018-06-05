@@ -4,8 +4,13 @@ import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.*;
 import gov.nasa.worldwind.geom.Box;
+import gov.nasa.worldwind.globes.Earth;
+import gov.nasa.worldwind.globes.EarthFlat;
+import gov.nasa.worldwind.globes.FlatGlobe;
+import gov.nasa.worldwind.globes.Globe;
 import gov.nasa.worldwind.layers.Layer;
 import gov.nasa.worldwind.layers.LayerList;
+import gov.nasa.worldwind.terrain.ZeroElevationModel;
 import gov.nasa.worldwind.util.Logging;
 
 import javax.swing.*;
@@ -27,6 +32,10 @@ public class App {
     private static LabeledCSVParser csvParser;
     private MainGUI.AppFrame aF;
     private String[] csvFieldNames;
+
+    private Globe roundGlobe;
+    private FlatGlobe flatGlobe;
+    public ArrayList<String> globeOptions = new ArrayList<String>();
 
     String attrToBin;
     DefaultComboBoxModel cbModel;
@@ -88,7 +97,39 @@ public class App {
         HashMap<Integer,ArrayList> hm = this.choroplethManager.colorHM.get(this.currentColorRampChosen);
         ArrayList<String> colorsAL = hm.get(this.currentlySelectedQuantileCount);
         this.aF.mainAppPanel.legendPanel.refreshLegend(colorsAL);
+        this.globeOptions.add("Globe");
+        this.globeOptions.add("Map");
+
+//        this.roundGlobe = this.aF.getWwd().getModel().getGlobe();
+//        this.flatGlobe = (FlatGlobe) this.aF.getWwd().getModel().getGlobe();
+//        this.flatGlobe.setElevationModel(new ZeroElevationModel());
     }
+
+//    public boolean isFlatGlobe()
+//    {
+//        return this.aF.getWwd().getModel().getGlobe() instanceof FlatGlobe;
+//    }
+//    public void enableFlatGlobe(boolean flat)
+//    {
+//        if (isFlatGlobe() == flat)
+//            return;
+//
+//        if (!flat)
+//        {
+//            // Switch to round globe
+//            this.aF.getWwd().getModel().setGlobe(roundGlobe);
+//            this.aF.getWwd().getView().stopMovement();
+//        }
+//        else
+//        {
+//            // Switch to flat globe
+//            this.aF.getWwd().getModel().setGlobe(flatGlobe);
+//            this.aF.getWwd().getView().stopMovement();
+////            this.updateProjection();
+//        }
+//
+//        this.aF.getWwd().redraw();
+//    }
 
     public void determineQuantileBounds(){
         this.quantileBoundsByIndex.clear();
