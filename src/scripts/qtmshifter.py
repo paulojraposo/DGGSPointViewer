@@ -111,7 +111,7 @@ def main():
     dst_layer = dst_ds.CreateLayer(fName, sRef, geom_type=ogr.wkbPolygon)
     levelFieldName = 'QTMID'
     layer_defn = dst_layer.GetLayerDefn()
-    new_field = ogr.FieldDefn(levelFieldName, ogr.OFTInteger) # String?
+    new_field = ogr.FieldDefn(levelFieldName, ogr.OFTString)
     dst_layer.CreateField(new_field)
 
     # Create features and write to file.

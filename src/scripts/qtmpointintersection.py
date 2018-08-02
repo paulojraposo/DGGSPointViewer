@@ -23,6 +23,7 @@ import numpy as np
 import nvector as nv
 from scipy import stats
 from osgeo import ogr, osr
+from makesingleqtmsublevel import determineOrient
 
 
 # Constants /////////////////////////////////////////////////////////////////////////
@@ -44,7 +45,7 @@ def intersectsPlateCarreeBoundingBox(aWKTPoint, aWKTPolygon):
     within the bounding box (aka envelope) of the polygon, returning a Boolean
     indicating the result."""
 
-    point   = ogr.CreateGeometryFromWkt(aWKTPoint)
+    point = ogr.CreateGeometryFromWkt(aWKTPoint)
     ptLat = point.GetY()
     ptLon = point.GetX()
 
@@ -63,13 +64,86 @@ def intersectsPlateCarreeBoundingBox(aWKTPoint, aWKTPolygon):
 
     return intersection
 
-
+# Polar ray casting method for intersect. Doesn't work at the moment, needs
+# more debugging.
 def intersectionTest_PolarRayCastGeodesicPolygon(aWKTPoint, aWKTPolygon):
-        # TODO: write me!
-        pass
 
+    intersectNum = 0
 
-def intersectionTest_ConvexSurroundingGeodesicPolygon(aWKTPoint, aWKTPolygon):
+    # nv frame and flattening set up
+    nvFrame   = nv.FrameE();
+    nvFrame.f = 0.0
+
+    point = ogr.CreateGeometryFromWkt(aWKTPoint)
+
+    polygon  = ogr.CreateGeometryFromWkt(aWKTPolygon)
+    subGeom  = polygon.GetGeometryRef(0) # Assumes only one outside linear ring!
+    subGeomVertices = subGeom.GetPoints()
+
+    # We start asuming we'll cast to the North Pole, change if our
+    # point is actually in the northern hemisphere.
+    rayCastingToNorthPole = True
+    pole = (90.0, 0.0) # lat then lon
+    if float(point.GetY()) >= 0.0: # if point is in northern hemisphere
+        rayCastingToNorthPole = False
+        pole = (-90.0, 0.0) # lat then lon
+
+    nvPoint = nvFrame.GeoPoint(float(point.GetY()), float(point.GetX()), degrees=True) # lat, then lon
+    nvPole = nvFrame.GeoPoint(float(pole[0]), float(pole[1]), degrees=True) # lat, then lon
+    polePath = nv.GeoPath(nvPoint, nvPole) # This is the path the ray traces to the given pole
+
+    # Iterate through the facet sides
+    for i in range(len(subGeomVertices) - 1):
+        v1 = subGeomVertices[i]
+        v2 = subGeomVertices[i + 1]
+
+        # Skip the polar singularities
+        if (v1[1] == v2[1] == 90.0) or (v1[1] == v2[1] == -90.0):
+            print("polar singularity skipped")
+            continue
+
+        # Test to see whether this is a latitude parallel or not. We treat these
+        # two cases differently, since parallel checks are easier in our case.
+        if v1[1] == v2[1]:
+            # print("working on a parallel")
+            # A parallel
+            lon1, lon2 = sorted([v1[0], v2[0]]) # sorted longitudes so lon1 < lon2
+            parallelLat = v1[1]
+            if rayCastingToNorthPole:
+                # Point is in southern hemisphere
+                if float(point.GetY()) < parallelLat and float(point.GetX()) >= lon1 and float(point.GetX()) <= lon2:
+                    intersectNum = intersectNum + 1
+                    print("parallel intersection")
+                else:
+                    print("no parallel intersection")
+            else:
+                # Point is in northern hemisphere
+                if float(point.GetY()) > parallelLat and float(point.GetX()) >= lon1 and float(point.GetX()) <= lon2:
+                    intersectNum = intersectNum + 1
+                    print("parallel intersection")
+                else:
+                    print("no parallel intersection")
+        else:
+            # A non-parallel arc of a great circle
+            # To start need to make a path out of the geometry vertices for this arc
+            vertStart = nvFrame.GeoPoint(float(v1[1]), float(v1[0]), degrees=True)
+            vertEnd = nvFrame.GeoPoint(float(v2[1]), float(v2[0]), degrees=True)
+            geomPath = nv.GeoPath(vertStart, vertEnd)
+
+            intersect = polePath.intersect(geomPath)
+            if geomPath.on_path(intersect)[0]:
+                print("gc arc intersection!")
+                intersectNum = intersectNum + 1
+            else:
+                print("no gc arc intersection")
+
+    print("intersectNum: {}".format(str(intersectNum)))
+    if intersectNum == 1:
+        return True
+    else:
+        return False
+
+def intersectionTest_ConvexSurroundingGeodesicPolygon(aWKTPoint, aWKTPolygon, facetID):
 
     """Checks for point-in-QTM facet intersection using a spherical
     model of the Earth by testing that the point is always to the
@@ -95,15 +169,36 @@ def intersectionTest_ConvexSurroundingGeodesicPolygon(aWKTPoint, aWKTPolygon):
     for vI in range(len(subGeomVertices) - 1): # Don't run on last vertex since there's none that follows it.
         start = subGeomVertices[vI]
         end = subGeomVertices[vI + 1]
-        # Below, nvector wants lat then lon. That's the reverse of what OGR stores, x then y.
-        pathStartPoint = nvFrame.GeoPoint(float(start[1]), float(start[0]), degrees=True) # lat then lon
-        pathEndPoint = nvFrame.GeoPoint(float(end[1]  ), float(end[0]  ), degrees=True) # lat then lon
-        gcArc = nv.GeoPath(pathStartPoint, pathEndPoint)
-        crossTrackDist = gcArc.cross_track_distance(nvPoint, method='greatcircle').ravel()
-        if crossTrackDist <= 0.0:
-            liesLeftList.append(True)
+
+        if start[1] == end[1]:
+            # A latitude parallel. 'Lies left' is a matter of being higher or lower in
+            # latitude, depending on whether the facet orientation is up or down,
+            # respectively.
+            orient = determineOrient(str(facetID), len(subGeomVertices))
+
+            if orient == "u":
+                if point.GetY() >= start[1]:
+                    liesLeftList.append(True)
+                else:
+                    liesLeftList.append(False)
+
+            if orient == "d":
+                if point.GetY() <= start[1]:
+                    liesLeftList.append(True)
+                else:
+                    liesLeftList.append(False)
         else:
-            liesLeftList.append(False)
+            # For facet sides that are 'diagonal' great circle arcs.
+            #
+            # Below, nvector wants lat then lon. That's the reverse of what OGR stores, x then y.
+            pathStartPoint = nvFrame.GeoPoint(float(start[1]), float(start[0]), degrees=True) # lat then lon
+            pathEndPoint   = nvFrame.GeoPoint(float(end[1]  ), float(end[0]  ), degrees=True) # lat then lon
+            gcArc = nv.GeoPath(pathStartPoint, pathEndPoint)
+            crossTrackDist = gcArc.cross_track_distance(nvPoint, method='greatcircle').ravel()
+            if crossTrackDist <= 0.0:
+                liesLeftList.append(True)
+            else:
+                liesLeftList.append(False)
 
     intersects = all(liesLeftList) # True if everything in liesLeftList evaluates to True, else False.
 
@@ -195,7 +290,7 @@ def main():
                 # The intersection checks. First check the bounding box (cheap and fast rejections),
                 # and then test geodetically if there is bounding box intersection.
                 if intersectsPlateCarreeBoundingBox(pointGeomWKT, facetGeomWKT):
-                    pointIsWithinFacet = intersectionTest_ConvexSurroundingGeodesicPolygon(pointGeomWKT, facetGeomWKT)
+                    pointIsWithinFacet = intersectionTest_ConvexSurroundingGeodesicPolygon(pointGeomWKT, facetGeomWKT, facetID)
 
                     if pointIsWithinFacet:
 

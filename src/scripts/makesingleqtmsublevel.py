@@ -9,11 +9,6 @@
 #                                                /____/          /_/          /____/
 
 
-"""
-This script...
-
-"""
-
 import sys, os, subprocess, datetime, argparse, logging
 import nvector as nv
 from osgeo import ogr, osr
