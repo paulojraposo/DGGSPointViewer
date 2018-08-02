@@ -28,3 +28,4 @@ def getDriverByFilepath(filepath):
     path, ext = os.path.splitext(filepath)
     ogrDriverTextCode = typesAndDrivers[ext.lower()]
     return ogr.GetDriverByName(ogrDriverTextCode)
+
