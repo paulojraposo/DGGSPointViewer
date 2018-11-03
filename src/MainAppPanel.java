@@ -191,7 +191,7 @@ public class MainAppPanel extends JPanel{
         bMAUPTitled = BorderFactory.createTitledBorder(bGreyLine, "Modifiable Areal Units", TitledBorder.LEFT,  TitledBorder.TOP, null, Color.black);
         maupPanel.setBorder(bMAUPTitled);
         maupPanel.setLayout(new GridLayout(2,2));
-        levelLabel = new JLabel("<html><b>Scaling</b> (QTM level to draw):</html>");
+        levelLabel = new JLabel("<html><b>Scaling</b> (QTM level):</html>");
         maupPanel.add(levelLabel);
         levelSlider = new JSlider(Main.app.minQTMLevel, Main.app.maxQTMLevels, Main.app.defaultQTMLevel);
         levelSlider.setMajorTickSpacing(1);
@@ -205,7 +205,7 @@ public class MainAppPanel extends JPanel{
             }
         });
         maupPanel.add(levelSlider);
-        EWTranslateLabel = new JLabel("<html><b>Zoning</b> (longitudinal shift<br>of mesh in degrees):</html>");
+        EWTranslateLabel = new JLabel("<html><b>Zoning</b> (East-West shift<br>of QTM in degrees):</html>");
         maupPanel.add(EWTranslateLabel);
         EWTranslateSlider = new JSlider(Main.app.minimumLonShift, Main.app.maximumLonShift, Main.app.defaultLonShift);
         EWTranslateSlider.setMajorTickSpacing(2);
