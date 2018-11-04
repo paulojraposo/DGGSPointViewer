@@ -113,14 +113,15 @@ public class MainAppPanel extends JPanel{
         chooseFileButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                fc = new JFileChooser();
-                fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-                // TODO: make file chooser filter for CSV files.
-                int returnVal = fc.showOpenDialog(binningPanel);
-                // Below, use a truncated name so the button doesn't grow (much) in size.
-                chooseFileButton.setText(truncateString(fc.getSelectedFile().getName(), 8));
-                usePreparedDataButton.setEnabled(false);
-                Main.app.receiveUserCSVPath(fc.getSelectedFile().toPath().toString());
+//                fc = new JFileChooser();
+//                fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+//                // TODO: make file chooser filter for CSV files.
+//                int returnVal = fc.showOpenDialog(binningPanel);
+//                // Below, use a truncated name so the button doesn't grow (much) in size.
+//                chooseFileButton.setText(truncateString(fc.getSelectedFile().getName(), 8));
+//                usePreparedDataButton.setEnabled(false);
+//                Main.app.receiveUserCSVPath(fc.getSelectedFile().toPath().toString());
+                Main.app.openBinningWindow();
             }
         });
         dataLoadingButtonsPanel.add(chooseFileButton);

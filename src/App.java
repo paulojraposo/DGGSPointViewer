@@ -90,6 +90,10 @@ public class App {
         this.aF.mainAppPanel.legendPanel.refreshLegend(colorsAL);
     }
 
+    public void openBinningWindow(){
+        BinningAppFrame binningFrame = new BinningAppFrame();
+    }
+
     public void determineQuantileBounds(){
         this.quantileBoundsByIndex.clear();
         List<Double> theValuesAsList = new ArrayList<Double>(this.quantileIndexesByBreakIndex.values());
