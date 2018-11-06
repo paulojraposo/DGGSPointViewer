@@ -93,7 +93,7 @@ public class BinningAppPanel extends JPanel {
 
         this.loadLabel = new JLabel("Load binned data to viewer:");
         this.add(this.loadLabel);
-        this.loadPanel = new JPanel();
+        this.loadPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         this.loadChkBox = new JCheckBox();
         this.loadChkBox.setSelected(true);
         this.loadPanel.add(this.loadChkBox);
