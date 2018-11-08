@@ -212,6 +212,7 @@ def main():
     # Parse arguments. Take in 4 required parameters and 1 optional parameter.
     parser = argparse.ArgumentParser(description=desc)
     parser.add_argument('QTMFILE', help='File of QTM facets to calculate intersection against points for.')
+    parser.add_argument('OUTFILE', help='Output file of QTM facets that will have intersection statistics as feature attributes.')
     parser.add_argument('POINTSCSV', help='CSV file with points to calculate intersection against QTM facets for. Must contain fields for lat and lon coordinates named exactly "latitude" and "longitude", case-specific.')
     # parser.add_argument('OUTFACETS', help='Full path for the product QTM GeoJSON file with spatially-binned statistics.')
     parser.add_argument('FIELD', help='Name of the field within the input CSV that statistics will be calculated on. Must be a ratio numerical value in all cells.')
@@ -219,8 +220,8 @@ def main():
     args = parser.parse_args()
     inFacetsFilePath = args.QTMFILE
     points  = args.POINTSCSV
-    # outFile = args.OUTFACETS
-    outFile = su.appendSuffixToFileName(inFacetsFilePath, "_agg")
+    outFile = args.OUTFILE
+    # outFile = su.appendSuffixToFileName(inFacetsFilePath, "_agg")
     inField = args.FIELD
     onlyIntersections = False
     if args.oi:
