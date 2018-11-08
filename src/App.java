@@ -252,23 +252,23 @@ public class App {
         return targetStream;
     }
 
-    private void enableBinningButton(){
-        this.aF.mainAppPanel.binningButton.setEnabled(true);
-    }
-
-    private void setAttrCBOptionsAndEnable(){
-        cbModel = new DefaultComboBoxModel(csvFieldNames);
-        this.aF.mainAppPanel.attrToBinCB.setModel(cbModel);
-
-        if (this.usingPreparedData == true){
-            try {
-                this.aF.mainAppPanel.attrToBinCB.setSelectedItem("pop_max");
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        this.aF.mainAppPanel.attrToBinCB.setEnabled(true);
-    }
+//    private void enableBinningButton(){
+//        this.aF.mainAppPanel.binningButton.setEnabled(true);
+//    }
+//
+//    private void setAttrCBOptionsAndEnable(){
+////        cbModel = new DefaultComboBoxModel(csvFieldNames);
+////        this.aF.mainAppPanel.attrToBinCB.setModel(cbModel);
+//
+//        if (this.usingPreparedData == true){
+//            try {
+//                this.aF.mainAppPanel.attrToBinCB.setSelectedItem("pop_max");
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        this.aF.mainAppPanel.attrToBinCB.setEnabled(true);
+//    }
 
     private void parseCSV(String filePath){
         // Read the user CSV, determine the field names, set UI
@@ -278,8 +278,8 @@ public class App {
             iS = pathToInputStream(filePath);
             csvParser = new LabeledCSVParser(new CSVParser(iS));
             csvFieldNames = csvParser.getLabels();
-            setAttrCBOptionsAndEnable();
-            enableBinningButton();
+//            setAttrCBOptionsAndEnable();
+//            enableBinningButton();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -308,13 +308,17 @@ public class App {
         // combobox in the GUI. Those should be saved to a temporary
         // location on the user's disk, to be selectable as layers to
         // load onto the globe.
+        // TODO write me!
 
+    }
+
+    public void bypassBinning(){
+
+        // Use built in data. Hard-code some parameters for that data.
         this.plotCSVPoints();
-
-        // Change hasBinned to true, to change what we draw for GeoJSON polygons.
+        this.usingPreparedData = true;
+        this.attrToBin = "pop_max";
         this.hasBinned = true;
-        this.aF.mainAppPanel.binningButton.setText("Done binning.");
-
         this.triggerRedraw();
 
     }
@@ -332,7 +336,6 @@ public class App {
         this.quantileIndexesByBreakIndex.clear();
         this.triggerRedraw();
         this.currentFacetsDataValues.clear();
-        this.aF.mainAppPanel.disableExportButtons();
     }
 
     /**
