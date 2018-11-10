@@ -99,6 +99,9 @@ public class BinningAppPanel extends JPanel {
                     userCSVFile = csvFC.getSelectedFile();
                     userCSVFilePath = userCSVFile.getAbsolutePath();
                     csvTextField.setText(userCSVFilePath);
+                    // Send CSV to main app and plot.
+                    Main.app.receiveUserCSVPath(userCSVFilePath);
+                    Main.app.plotCSVPoints();
                     csvChosen = true;
                     tryEnableRunButton();
 //                    System.out.println("File: " + userCSVFilePath + ".");

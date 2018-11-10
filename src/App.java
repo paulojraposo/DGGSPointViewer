@@ -157,11 +157,6 @@ public class App {
         this.attrToBin = attribute;
     }
 
-    public void receiveUserCSVPath(String aPath){
-        this.userCSVFilePath = aPath;
-        this.parseCSV(this.userCSVFilePath);
-    }
-
     public void removeQTMLayer(){
         LayerList ll = this.aF.getWwd().getModel().getLayers();
         for (Layer l: ll){
@@ -245,30 +240,16 @@ public class App {
 
     }
 
-
     public InputStream pathToInputStream(String path) throws IOException {
         File initialFile = new File(path);
         InputStream targetStream = new FileInputStream(initialFile);
         return targetStream;
     }
 
-//    private void enableBinningButton(){
-//        this.aF.mainAppPanel.binningButton.setEnabled(true);
-//    }
-//
-//    private void setAttrCBOptionsAndEnable(){
-////        cbModel = new DefaultComboBoxModel(csvFieldNames);
-////        this.aF.mainAppPanel.attrToBinCB.setModel(cbModel);
-//
-//        if (this.usingPreparedData == true){
-//            try {
-//                this.aF.mainAppPanel.attrToBinCB.setSelectedItem("pop_max");
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        this.aF.mainAppPanel.attrToBinCB.setEnabled(true);
-//    }
+    public void receiveUserCSVPath(String aPath){
+        this.userCSVFilePath = aPath;
+        this.parseCSV(this.userCSVFilePath);
+    }
 
     private void parseCSV(String filePath){
         // Read the user CSV, determine the field names, set UI
@@ -277,26 +258,61 @@ public class App {
         try {
             iS = pathToInputStream(filePath);
             csvParser = new LabeledCSVParser(new CSVParser(iS));
+//            System.out.println(csvParser.getAllValues());
             csvFieldNames = csvParser.getLabels();
-//            setAttrCBOptionsAndEnable();
-//            enableBinningButton();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void plotCSVPoints(){
+    private LatLon getCSVCentroid(String filePath) throws IOException {
+
+        // Finds the center lat lon point for the input CSV. For turning
+        // the globe automatically to the center of the user's plotted points.
+
+        // Collect all the lats and lons and get the halfway point in their ranges.
+
+        InputStream iS = pathToInputStream(filePath);
+        LabeledCSVParser csvP = new LabeledCSVParser(new CSVParser(iS));
+
+        ArrayList<Float> Lats = new ArrayList<Float>();
+        ArrayList<Float> Lons = new ArrayList<Float>();
+        while(csvP.getLine() != null){
+            Lats.add(Float.parseFloat(csvP.getValueByLabel("latitude")));
+            Lons.add(Float.parseFloat(csvP.getValueByLabel("longitude")));
+        }
+        Float minLat = Collections.min(Lats);
+        Float maxLat = Collections.max(Lats);
+        Float minLon = Collections.min(Lons);
+        Float maxLon = Collections.max(Lons);
+
+        Float centerLat = (maxLat - minLat)/2 + minLat;
+        Float centerLon = (maxLon - minLon)/2 + minLon;
+
+        return LatLon.fromDegrees(centerLat, centerLon);
+
+    }
+
+    public void plotCSVPoints() {
         MarkerLayerMaker mlm = new MarkerLayerMaker(csvParser);
         mlm.makeMarkers();
         Layer markerLayer = mlm.makeMarkerLayer();
         markerLayer.setName(dataPointsLayerName);
         Sector sector = (Sector) markerLayer.getValue(AVKey.SECTOR);
         this.aF.getWwd().getModel().getLayers().add(markerLayer);
+        rotateGlobeToCenterOfPoints();
+    }
 
+    public void rotateGlobeToCenterOfPoints(){
         // Rotate the globe to the loaded data.
-        // TODO: make this location programatic, not hard-coded.
-        LatLon rotateLatLon = LatLon.fromDegrees(4.0, 19.0); // Approx the center of Africa.
-        this.aF.getWwd().getView().goTo(new Position(rotateLatLon,0.0), 12000000.0);
+        try{
+            LatLon rotateLatLon = getCSVCentroid(this.userCSVFilePath);
+            this.aF.getWwd().getView().goTo(new Position(rotateLatLon,0.0), 12000000.0);
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+            System.out.println("Failed to rotate globe to center of user CSV :(");
+        }
+
     }
 
     public void performBinning(){
