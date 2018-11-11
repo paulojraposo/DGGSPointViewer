@@ -79,7 +79,7 @@ public class BinningAppPanel extends JPanel {
         // their cell locations, and to keep everything in consistent
         // relative dimensions.
 
-        // We keep runButton disabled until the user have given all of a csv file, a folder, and column name.
+        // We keep loadButton disabled until the user have given all of a csv file, a folder, and column name.
 
         /*
         CSV File

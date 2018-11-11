@@ -74,6 +74,9 @@ public class App {
 
     public ChoroplethManager choroplethManager;
 
+    private String preparedDataPathFormat = "out/resources/prepareddata/AfricaPopPlaces/qtmlvl%slonshft%s_agg.geojson";
+
+    public String userDataPathFormat;
 
     public App(){
 
@@ -92,6 +95,10 @@ public class App {
 
     public void openBinningWindow(){
         BinningAppFrame binningFrame = new BinningAppFrame();
+    }
+
+    public void openUserLoadingWindow(){
+        UserLoadingAppFrame userLoadingFrame = new UserLoadingAppFrame();
     }
 
     public void determineQuantileBounds(){
@@ -115,13 +122,11 @@ public class App {
         removeLayerByName(qtmLayerName);
         removeLayerByName(this.currentlyLoadedQTMDataLayerName);
         if (hasBinned == true){
-            if (usingPreparedData == true){
-                loadIncludedChoroplethGeoJSON();
-            }
+            loadChoroplethGeoJSON();
         }else{
             loadBlankGeoJSON();
         }
-
+        this.choroplethManager = new ChoroplethManager();
         HashMap<Integer,ArrayList> hm = this.choroplethManager.colorHM.get(this.currentColorRampChosen);
         ArrayList<String> colorsAL = hm.get(this.currentlySelectedQuantileCount);
         this.aF.mainAppPanel.legendPanel.refreshLegend(colorsAL);
@@ -209,9 +214,17 @@ public class App {
         // this.aF.getWwd().getModel().getLayers().set(0,lyr);
     }
 
-    public void loadIncludedChoroplethGeoJSON(){
+    public void loadChoroplethGeoJSON(){
         AppGeoJSONLoader gjLoader = new AppGeoJSONLoader();
-        String qtmResourceFilePath = String.format("out/resources/prepareddata/AfricaPopPlaces/qtmlvl%slonshft%s_agg.geojson",
+        // Defaults to prepared data, but uses the user's data if usingPreparedData == false.
+        String dataPathFormat = preparedDataPathFormat;
+        if (this.usingPreparedData == false){
+            dataPathFormat = userDataPathFormat;
+//            System.out.println(userDataPathFormat);
+//            System.out.println(this.currentlySelectedQTMLevel);
+//            System.out.println(this.currentlySelectedLonShift);
+        }
+        String qtmResourceFilePath = String.format(dataPathFormat,
         String.valueOf(this.currentlySelectedQTMLevel),
         String.valueOf(Double.valueOf(this.currentlySelectedLonShift)));
 
@@ -220,7 +233,7 @@ public class App {
         // value we're interested in.
         gjLoader.readDataByVariableNameFromSource(qtmResourceFilePath);
         Double quantileInterval = 100.0 / this.currentlySelectedQuantileCount;
-        Integer thisQuantileBreak = quantileInterval.intValue();
+        Integer thisQuantileBreak;// = quantileInterval.intValue();
         for (int i = 0; i < this.currentlySelectedQuantileCount; i++){
             thisQuantileBreak =  quantileInterval.intValue() * i ;
             double thisPercentile = percentiles().index(thisQuantileBreak).compute(this.currentFacetsDataValues);
@@ -233,9 +246,10 @@ public class App {
         this.determineQuantileBounds();
 
         Layer lyr = gjLoader.createLayerFromSource(qtmResourceFilePath);
-        this.currentlyLoadedQTMDataLayerName = qtmLayerName + " Africa Populated Places";
-        lyr.setName(this.currentlyLoadedQTMDataLayerName);
         this.removeLayerByName(this.currentlyLoadedQTMDataLayerName);
+        this.currentlyLoadedQTMDataLayerName = qtmLayerName;
+        lyr.setName(this.currentlyLoadedQTMDataLayerName);
+
         this.aF.getWwd().getModel().getLayers().add(lyr);
 
     }
@@ -249,6 +263,14 @@ public class App {
     public void receiveUserCSVPath(String aPath){
         this.userCSVFilePath = aPath;
         this.parseCSV(this.userCSVFilePath);
+    }
+
+    public void receiveUserQTMLayersFolderPath(String aPath){
+//        System.out.println("received " + aPath);
+        this.userDataPathFormat = aPath;
+        this.hasBinned = true;
+        this.attrToBin = "pop_max"; //TODO: I think this does nothing. Need to check, and remove the check for this in AppGeoJSONLoader in addRenderableForPolygon().
+        this.triggerRedraw();
     }
 
     private void parseCSV(String filePath){
@@ -346,7 +368,7 @@ public class App {
         this.csvFieldNames = null;
         this.cbModel = new DefaultComboBoxModel(); // A new empty DefaultComboBoxModel.
         this.userCSVFilePath = null;
-        usingPreparedData = false;
+        this.usingPreparedData = false;
         this.hasBinned = false;
         this.aF.mainAppPanel.resetAllBinningControls();
         this.quantileIndexesByBreakIndex.clear();

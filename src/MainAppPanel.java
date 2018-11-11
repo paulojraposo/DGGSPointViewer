@@ -25,8 +25,8 @@ public class MainAppPanel extends JPanel{
     JLabel chooseFileLabel;
     JPanel dataLoadingButtonsPanel;
     JButton usePreparedDataButton;
-    String customBinningButtonText = "Choose file";
-    JButton customBinningButton;
+    String loadUserLayersButtonText = "Load data...";
+    JButton loadUserLayersButton;
 
     // MAUP panel
     JPanel maupPanel;
@@ -87,7 +87,7 @@ public class MainAppPanel extends JPanel{
                 // and set the main app Boolean usingPreparedData, which in turn
                 // signals to not actually perform binning, but use preloaded geojson
                 // files.
-                customBinningButton.setEnabled(false);
+                loadUserLayersButton.setEnabled(false);
                 File preparedDataCSVFile = new File("out/resources/prepareddata/AfricaPopPlaces/AfricaPopulatedPlacesForApp.csv");
                 String prepreparedDataPathString = preparedDataCSVFile.toPath().toString();
                 Main.app.hasBinned = true;
@@ -98,15 +98,16 @@ public class MainAppPanel extends JPanel{
         });
         dataLoadingButtonsPanel.add(usePreparedDataButton);
 
-        customBinningButton = new JButton(this.customBinningButtonText);
-        customBinningButton.addActionListener(new ActionListener() {
+        loadUserLayersButton = new JButton(this.loadUserLayersButtonText);
+        loadUserLayersButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 usePreparedDataButton.setEnabled(false);
-                Main.app.openBinningWindow();
+//                Main.app.openBinningWindow();
+                Main.app.openUserLoadingWindow();
             }
         });
-        dataLoadingButtonsPanel.add(customBinningButton);
+        dataLoadingButtonsPanel.add(loadUserLayersButton);
         binningPanel.add(dataLoadingButtonsPanel);
 
         this.add(binningPanel);
@@ -229,12 +230,12 @@ public class MainAppPanel extends JPanel{
     }
     public void disableAllBinningControls(){
         this.usePreparedDataButton.setEnabled(false);
-        this.customBinningButton.setEnabled(false);
+        this.loadUserLayersButton.setEnabled(false);
     }
 
     public void resetAllBinningControls(){
         this.usePreparedDataButton.setEnabled(true);
-        this.customBinningButton.setEnabled(true);
+        this.loadUserLayersButton.setEnabled(true);
     }
 
 }

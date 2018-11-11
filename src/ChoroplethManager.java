@@ -107,7 +107,7 @@ public class ChoroplethManager {
 
     public Integer getClassificationForValue(Double aValue){
         // Given a number, determine which quantile it falls into,
-        // espressed as an integer, with 0 being the first of however
+        // expressed as an integer, with 0 being the first of however
         // many are being used. Returns null if there's no match, or
         // the value passed is zero.
 
