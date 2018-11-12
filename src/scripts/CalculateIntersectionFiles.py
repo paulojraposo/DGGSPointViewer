@@ -95,13 +95,13 @@ def main():
     printHeaderMsg("Starting intersection calculations.")
 
     aCounter = 1
-    permutations = (args.MAXQTMLEVEL - firstProcessedLevel + 1) * 11 # levels by lon shifts.
+    permutations = (int(args.MAXQTMLEVEL) - firstProcessedLevel + 1) * 11 # levels by lon shifts.
 
     # For giving the user an estimate of time left before completion from this point on.
     permutationTimes = []
     runningPermTimeAverage = None
 
-    for qlvl in range(int(args.MAXQTMLEVEL + 1)):
+    for qlvl in range(int(args.MAXQTMLEVEL) + 1):
 
         if qlvl >= firstProcessedLevel:
 

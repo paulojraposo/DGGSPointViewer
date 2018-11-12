@@ -72,7 +72,6 @@ public class AppGeoJSONLoader
             if (doc.getRootObject() instanceof GeoJSONObject)
             {
                 this.addGeoJSONGeometryToLayer((GeoJSONObject) doc.getRootObject(), layer);
-//                System.out.println("was GeoJSONObject");
             }
             else if (doc.getRootObject() instanceof Object[])
             {
@@ -137,7 +136,6 @@ public class AppGeoJSONLoader
         }
         else if (object.isFeatureCollection()) {
             this.addRenderableForFeatureCollection(object.asFeatureCollection(), layer);
-//            System.out.println("feturecollection");
         }
         else {
             this.handleUnrecognizedObject(object);
@@ -145,10 +143,8 @@ public class AppGeoJSONLoader
     }
 
     public void readDataByVariableNameFromSource(Object docSource){
-//        System.out.println("trying to work with " + String.valueOf(docSource));
         Main.app.currentFacetsDataValues.clear();
         GeoJSONDoc doc = null;
-
         try
         {
             doc = new GeoJSONDoc(docSource);
@@ -160,35 +156,12 @@ public class AppGeoJSONLoader
                 GeoJSONFeatureCollection thisGeoJSONFeatureCollection = thisGeoJSONObject.asFeatureCollection();
                 GeoJSONFeature[] features = thisGeoJSONFeatureCollection.getFeatures();
                 for (GeoJSONFeature feat : features){
-//                    System.out.println(String.valueOf(feat.getProperties().getEntries()));
                     Double thisStat = (Double) feat.getProperties().getValue(Main.app.aggregatedStatOfInterest);
-//                    System.out.println("gonna be null?");
-//                    System.out.println(String.valueOf(thisStat));
                     if (thisStat > 0.0) { // Add only if its more than zero, as zero facets we'll leave blank on the map.
                         Main.app.currentFacetsDataValues.add(thisStat);
-//                        System.out.println("added a stat! " + String.valueOf(thisStat));
                     }
                 }
             }
-//            else if (doc.getRootObject() instanceof Object[])
-//            {
-//                for (Object o : (Object[]) doc.getRootObject())
-//                {
-//                    if (o instanceof GeoJSONObject)
-//                    {
-//                        this.addGeoJSONGeometryToLayer((GeoJSONObject) o, layer);
-//                        System.out.println("Wasn't GeoJSONObject");
-//                    }
-//                    else
-//                    {
-//                        this.handleUnrecognizedObject(o);
-//                    }
-//                }
-//            }
-//            else
-//            {
-//                this.handleUnrecognizedObject(doc.getRootObject());
-//            }
         }
         catch (IOException e)
         {
@@ -275,7 +248,7 @@ public class AppGeoJSONLoader
             this.addRenderableForMutiLineString(geom.asMultiLineString(), layer, properties);
         }
         else if (geom.isPolygon()) {
-//            System.out.println("POLY");
+
             this.addRenderableForPolygon(geom.asPolygon(), layer, properties);
         }
         else if (geom.isMultiPolygon()) {
@@ -361,20 +334,12 @@ public class AppGeoJSONLoader
     {
         ShapeAttributes attrs = this.createBlankPolygonAttributes();
         if (Main.app.hasBinned == true){
-            if (Main.app.attrToBin != null){
-                Double thisStat = (Double) properties.getValue(Main.app.aggregatedStatOfInterest);
-//                System.out.println(String.valueOf(thisStat));
-                if (thisStat > 0.0){
-//                    System.out.println("tripped the if");
-
-                    Integer thisClassIndex = Main.app.choroplethManager.getClassificationForValue(thisStat);
-
-                    ArrayList<String> shades = (ArrayList) Main.app.choroplethManager.colorHM.get(Main.app.currentColorRampChosen).get(Main.app.currentlySelectedQuantileCount);
-//                    System.out.println(s);
-                    attrs.setInteriorMaterial(new Material(Color.decode(shades.get(thisClassIndex))));
-                    attrs.setInteriorOpacity(0.7);
-//                    attrs.setDrawInterior(true);
-                }
+            Double thisStat = (Double) properties.getValue(Main.app.aggregatedStatOfInterest);
+            if (thisStat > 0.0){
+                Integer thisClassIndex = Main.app.choroplethManager.getClassificationForValue(thisStat);
+                ArrayList<String> shades = (ArrayList) Main.app.choroplethManager.colorHM.get(Main.app.currentColorRampChosen).get(Main.app.currentlySelectedQuantileCount);
+                attrs.setInteriorMaterial(new Material(Color.decode(shades.get(thisClassIndex))));
+                attrs.setInteriorOpacity(0.7);
             }
         }
 

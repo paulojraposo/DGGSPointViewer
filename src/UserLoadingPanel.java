@@ -58,7 +58,7 @@ public class UserLoadingPanel extends JPanel {
         // their cell locations, and to keep everything in consistent
         // relative dimensions.
 
-        // We keep loadButton disabled until the user have given all of a csv file, a folder, and column name.
+        // We keep loadButton disabled until the user have given all of a csv file and a folder.
 
         /*
         CSV File
@@ -66,7 +66,7 @@ public class UserLoadingPanel extends JPanel {
 
         this.csvLabel = new JLabel("CSV of points:");
         this.add(this.csvLabel);
-        this.csvTextField = new JTextField("choose a file...");
+        this.csvTextField = new JTextField("Choose a file...");
         this.chooseCSVButton = new JButton("Choose");
         this.chooseCSVButton.addActionListener(new ActionListener() {
             @Override
@@ -83,7 +83,6 @@ public class UserLoadingPanel extends JPanel {
                     Main.app.plotCSVPoints();
                     csvChosen = true;
                     tryEnableLoadButton();
-//                    System.out.println("File: " + userCSVFilePath + ".");
                 }
             }
         });
@@ -94,7 +93,6 @@ public class UserLoadingPanel extends JPanel {
         this.csvChoosingPanel.add(this.chooseCSVButton);
         this.add(this.csvChoosingPanel);
 
-
         /*
         Folder to save to
          */
@@ -103,8 +101,8 @@ public class UserLoadingPanel extends JPanel {
         this.add(this.inFolderLabel);
         this.inFolderPanel = new JPanel();
         this.inFolderPanel.setLayout(new GridLayout(1,2));
-        this.inFolderTextField = new JTextField("", 20);
-        this.inFolderButton = new JButton("Choose Folder");
+        this.inFolderTextField = new JTextField("Choose a folder...", 20);
+        this.inFolderButton = new JButton("Choose");
         this.inFolderButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -117,7 +115,6 @@ public class UserLoadingPanel extends JPanel {
                     inFolderTextField.setText(userDirectoryPath);
                     folderChosen = true;
                     tryEnableLoadButton();
-//                    System.out.println("Folder: " + userDirPath + ".");
                 }
             }
         });
@@ -132,21 +129,18 @@ public class UserLoadingPanel extends JPanel {
         this.add(this.dummyBlankLabel = new JLabel(""));
         this.loadButton = new JButton("Load Layers");
         this.loadButton.setEnabled(false); // Disabled until csv file, folder, and column name are given.
-        // TODO: add action listener and functionality to this button!
         this.loadButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                //
-                String dataPathFormat = buildUserDataPathFormat(userDirectoryPath);
-//                System.out.println(dataPathFormat);
-                Main.app.receiveUserQTMLayersFolderPath(dataPathFormat);
-//              System.out.println("Folder: " + userDirPath + ".");
-
+                String fileNameFormat = "qtmlvl%slonshft%s_agg.geojson";
+                Main.app.receiveUserQTMLayersFolderPathAndFormat(userDirectoryPath, fileNameFormat);
+                try{
+                    Main.app.rotateGlobeToCenterOfPoints();
+                } catch (Exception ex){
+                    System.out.println(ex.getMessage());
+                }
             }
         });
-
-
-
         this.add(this.loadButton);
 
         /*
@@ -155,7 +149,7 @@ public class UserLoadingPanel extends JPanel {
 
         // Setting just the width
         Dimension ps = this.getPreferredSize();
-        ps.width = 600;
+        ps.width = 520;
         this.setPreferredSize(ps);
 
         this.setVisible(true);
@@ -174,5 +168,4 @@ public class UserLoadingPanel extends JPanel {
             loadButton.setEnabled(true);
         }
     }
-
 }

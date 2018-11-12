@@ -103,7 +103,6 @@ public class MainAppPanel extends JPanel{
             @Override
             public void actionPerformed(ActionEvent e) {
                 usePreparedDataButton.setEnabled(false);
-//                Main.app.openBinningWindow();
                 Main.app.openUserLoadingWindow();
             }
         });
@@ -121,7 +120,6 @@ public class MainAppPanel extends JPanel{
         maupPanel.add(levelLabel);
         levelSlider = new JSlider(Main.app.minQTMLevel, Main.app.maxQTMLevels, Main.app.defaultQTMLevel);
         levelSlider.setMajorTickSpacing(1);
-        // levelSlider.setMinorTickSpacing(1);
         levelSlider.setPaintTicks(true);
         levelSlider.setPaintLabels(true);
         levelSlider.addChangeListener(new ChangeListener() {
@@ -176,7 +174,6 @@ public class MainAppPanel extends JPanel{
         classingAndMappingPanel.add(colorLabel);
         colorRadioButtonsPanel = new JPanel();
         colorRadioButtonsPanel.setLayout(new GridBagLayout());
-//        colorRadioButtonsPanel.setLayout(new BoxLayout(colorRadioButtonsPanel, BoxLayout.LINE_AXIS));
         orangesRB = new JRadioButton(Main.app.orangesName);
         orangesRB.addActionListener(new ActionListener() {
             @Override
@@ -205,8 +202,6 @@ public class MainAppPanel extends JPanel{
         clearAndResetPanel = new JPanel();
         GridLayout clearAndResetPanelLayout = new GridLayout(1,2);
         clearAndResetPanel.setLayout(clearAndResetPanelLayout);
-//        bClearAndReset = BorderFactory.createTitledBorder(bGreyLine, "", TitledBorder.LEFT,  TitledBorder.TOP, null, Color.black);
-//        clearAndResetPanel.setBorder(bClearAndReset);
         clearAndResetLabel = new JLabel("");
         clearAndResetPanel.add(clearAndResetLabel);
         clearAndResetButton = new JButton("Clear & Reset App");

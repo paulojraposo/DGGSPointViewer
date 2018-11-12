@@ -1,5 +1,7 @@
 import com.Ostermiller.util.CSVParser;
 import com.Ostermiller.util.LabeledCSVParser;
+import com.google.common.base.CharMatcher;
+import com.google.common.base.Splitter;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
 import gov.nasa.worldwind.geom.*;
@@ -18,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
+import static com.google.common.base.Splitter.onPattern;
 import static com.google.common.math.Quantiles.percentiles;
 
 public class App {
@@ -28,13 +31,12 @@ public class App {
     private MainGUI.AppFrame aF;
     private String[] csvFieldNames;
 
-    String attrToBin;
     DefaultComboBoxModel cbModel;
 
     // Limited maxBinningLevel to 7, down from 11, 2018-05-18, for performance's sake, for now.
     public int maxBinningLevel = 6; // 7th level's index, by default, user-changeable.
     public String[] levelOptions = new String[]{"1", "2", "3", "4", "5", "6", "7"};//,
-            //"8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"};
+    //"8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"};
 
     public int minQTMLevel = 3;
     public int maxQTMLevels = 6;
@@ -68,9 +70,9 @@ public class App {
 
     public ArrayList<Double> currentFacetsDataValues = new ArrayList<Double>();
 
-    public HashMap<Integer,Double> quantileIndexesByBreakIndex = new HashMap<Integer, Double>();
+    public HashMap<Integer, Double> quantileIndexesByBreakIndex = new HashMap<Integer, Double>();
 
-    public HashMap<Integer,ArrayList> quantileBoundsByIndex;
+    public HashMap<Integer, ArrayList> quantileBoundsByIndex;
 
     public ChoroplethManager choroplethManager;
 
@@ -78,36 +80,36 @@ public class App {
 
     public String userDataPathFormat;
 
-    public App(){
+    public App() {
 
     }
 
-    public void initialize(){
+    public void initialize() {
         this.mGUI = new MainGUI();
         this.aF = this.mGUI.start("Point Stats on a Discrete Global Grid", MainGUI.AppFrame.class);
         this.loadBlankGeoJSON();
         this.choroplethManager = new ChoroplethManager();
-        this.quantileBoundsByIndex = new HashMap<Integer,ArrayList>();
-        HashMap<Integer,ArrayList> hm = this.choroplethManager.colorHM.get(this.currentColorRampChosen);
+        this.quantileBoundsByIndex = new HashMap<Integer, ArrayList>();
+        HashMap<Integer, ArrayList> hm = this.choroplethManager.colorHM.get(this.currentColorRampChosen);
         ArrayList<String> colorsAL = hm.get(this.currentlySelectedQuantileCount);
         this.aF.mainAppPanel.legendPanel.refreshLegend(colorsAL);
     }
 
-    public void openBinningWindow(){
+    public void openBinningWindow() {
         BinningAppFrame binningFrame = new BinningAppFrame();
     }
 
-    public void openUserLoadingWindow(){
+    public void openUserLoadingWindow() {
         UserLoadingAppFrame userLoadingFrame = new UserLoadingAppFrame();
     }
 
-    public void determineQuantileBounds(){
+    public void determineQuantileBounds() {
         this.quantileBoundsByIndex.clear();
         List<Double> theValuesAsList = new ArrayList<Double>(this.quantileIndexesByBreakIndex.values());
         Collections.sort(theValuesAsList); // sort ascending.
-        for (int i=0; i < Main.app.currentlySelectedQuantileCount ; i++){
+        for (int i = 0; i < Main.app.currentlySelectedQuantileCount; i++) {
             Double thisLowerBound = theValuesAsList.get(i);
-            Double thisUpperBound = theValuesAsList.get(i+1);
+            Double thisUpperBound = theValuesAsList.get(i + 1);
             ArrayList<Double> theseBounds = new ArrayList<Double>();
             theseBounds.add(thisLowerBound);
             theseBounds.add(thisUpperBound);
@@ -115,85 +117,77 @@ public class App {
         }
     }
 
-    public void triggerRedraw(){
+    public void triggerRedraw() {
         // Remove the previous QTM layer and use the relevant GeoJSON loading method,
         // based on whether the user has binned yet.
         this.quantileIndexesByBreakIndex.clear();
         removeLayerByName(qtmLayerName);
         removeLayerByName(this.currentlyLoadedQTMDataLayerName);
-        if (hasBinned == true){
+        if (hasBinned == true) {
             loadChoroplethGeoJSON();
-        }else{
+        } else {
             loadBlankGeoJSON();
         }
         this.choroplethManager = new ChoroplethManager();
-        HashMap<Integer,ArrayList> hm = this.choroplethManager.colorHM.get(this.currentColorRampChosen);
+        HashMap<Integer, ArrayList> hm = this.choroplethManager.colorHM.get(this.currentColorRampChosen);
         ArrayList<String> colorsAL = hm.get(this.currentlySelectedQuantileCount);
         this.aF.mainAppPanel.legendPanel.refreshLegend(colorsAL);
         this.aF.mainAppPanel.validate();
         this.aF.mainAppPanel.repaint();
     }
 
-    public void setCurrentColorRampChosen(String colorRampName){
+    public void setCurrentColorRampChosen(String colorRampName) {
         this.currentColorRampChosen = colorRampName;
         triggerRedraw();
     }
 
-    public void setCurrentQTMDrawingLevel(Integer lvl){
+    public void setCurrentQTMDrawingLevel(Integer lvl) {
         this.currentlySelectedQTMLevel = lvl;
         triggerRedraw();
     }
 
-    public void setCurrentLonShift(Integer lShift){
+    public void setCurrentLonShift(Integer lShift) {
         this.currentlySelectedLonShift = lShift;
         triggerRedraw();
     }
 
-    public void setCurrentlySelectedQuantileCount(Integer qCount){
+    public void setCurrentlySelectedQuantileCount(Integer qCount) {
         this.currentlySelectedQuantileCount = qCount;
         triggerRedraw();
     }
 
-    public void setMaxBinningLevel(Integer lvl){
-        this.maxBinningLevel = lvl;
-    }
-
-    public void setAttrToBin(String attribute){
-        this.attrToBin = attribute;
-    }
-
-    public void removeQTMLayer(){
+    public void removeQTMLayer() {
         LayerList ll = this.aF.getWwd().getModel().getLayers();
-        for (Layer l: ll){
-            if (l.getName() == this.qtmLayerName){
+        for (Layer l : ll) {
+            if (l.getName() == this.qtmLayerName) {
                 this.aF.getWwd().getModel().getLayers().remove(l);
             }
         }
     }
 
-    public void removeLayerByName(String layerName){
+    public void removeLayerByName(String layerName) {
         LayerList ll = this.aF.getWwd().getModel().getLayers();
-        for (Layer l: ll){
-            if (l.getName() == layerName){
+        for (Layer l : ll) {
+            if (l.getName() == layerName) {
                 this.aF.getWwd().getModel().getLayers().remove(l);
             }
         }
     }
 
-    public void removeDataPointsLayer(){
+    public void removeDataPointsLayer() {
         LayerList ll = this.aF.getWwd().getModel().getLayers();
-        for (Layer l: ll){
-            if (l.getName() == this.dataPointsLayerName){
+        for (Layer l : ll) {
+            if (l.getName() == this.dataPointsLayerName) {
                 this.aF.getWwd().getModel().getLayers().remove(l);
             }
         }
     }
 
-    public void rotateGlobeToLayerByName(String layerName){
+    public void rotateGlobeToLayerByName(String layerName) {
         // TODO: write me!
     }
 
-    public void loadBlankGeoJSON(){
+    public void loadBlankGeoJSON() {
         AppGeoJSONLoader gjLoader = new AppGeoJSONLoader();
         /*
         Below, we retrieve saved QTM geojson files, which have a fixed naming
@@ -204,8 +198,8 @@ public class App {
          */
         String qtmResourceFilePath = String.format("out/resources/prepareddata/blankQTM/qtmlvl%slonshft%s.geojson",
                 String.valueOf(this.currentlySelectedQTMLevel),
-                String.valueOf(Double.valueOf(this.currentlySelectedLonShift)) //+ ".0" // Paste-on .0 since the Python script names its outputs using decimal numbers, not integers.
-                );
+                String.valueOf(Double.valueOf(this.currentlySelectedLonShift))
+        );
         Layer lyr = gjLoader.createLayerFromSource(qtmResourceFilePath);
         this.currentlyLoadedQTMDataLayerName = qtmLayerName;
         lyr.setName(qtmLayerName);
@@ -214,28 +208,24 @@ public class App {
         // this.aF.getWwd().getModel().getLayers().set(0,lyr);
     }
 
-    public void loadChoroplethGeoJSON(){
+    public void loadChoroplethGeoJSON() {
         AppGeoJSONLoader gjLoader = new AppGeoJSONLoader();
         // Defaults to prepared data, but uses the user's data if usingPreparedData == false.
         String dataPathFormat = preparedDataPathFormat;
-        if (this.usingPreparedData == false){
+        if (this.usingPreparedData == false) {
             dataPathFormat = userDataPathFormat;
-//            System.out.println(userDataPathFormat);
-//            System.out.println(this.currentlySelectedQTMLevel);
-//            System.out.println(this.currentlySelectedLonShift);
         }
         String qtmResourceFilePath = String.format(dataPathFormat,
-        String.valueOf(this.currentlySelectedQTMLevel),
-        String.valueOf(Double.valueOf(this.currentlySelectedLonShift)));
-
+                String.valueOf(this.currentlySelectedQTMLevel),
+                String.valueOf(Double.valueOf(this.currentlySelectedLonShift)));
         // Read the data and determine quantiles so we can use them to drive
         // the appearance of the facets on the globe according to the attribute
         // value we're interested in.
         gjLoader.readDataByVariableNameFromSource(qtmResourceFilePath);
         Double quantileInterval = 100.0 / this.currentlySelectedQuantileCount;
         Integer thisQuantileBreak;// = quantileInterval.intValue();
-        for (int i = 0; i < this.currentlySelectedQuantileCount; i++){
-            thisQuantileBreak =  quantileInterval.intValue() * i ;
+        for (int i = 0; i < this.currentlySelectedQuantileCount; i++) {
+            thisQuantileBreak = quantileInterval.intValue() * i;
             double thisPercentile = percentiles().index(thisQuantileBreak).compute(this.currentFacetsDataValues);
             quantileIndexesByBreakIndex.put(thisQuantileBreak, thisPercentile);
         }
@@ -254,6 +244,33 @@ public class App {
 
     }
 
+    public Integer determineMaxQTMLevelFromLayerFiles(String folderPath) {
+        // Looks at all the files in the directory, and splits them on contiguous groups
+        // of alphabet characters. This depends on the file naming convention:
+        // qtmlvlXlonshftX_agg.geojson
+        // where X is an integer or decimal number, positive or negative.
+        // We want the first X, which will be a positive integer indicating the QTM
+        // level of the file. We want to know the highest level present in the files.
+        File folder = new File(folderPath);
+        File[] listOfFiles = folder.listFiles();
+        int highestLevel = 0;
+        Splitter spl =  Splitter.onPattern("[a-zA-Z]+").omitEmptyStrings(); // regex for any number of contiguous alphabet characters.
+        for(File f: listOfFiles){
+            if (f.isFile()) {
+                List<String> l = spl.splitToList(f.getName());
+                int thisLevel = Integer.parseInt(l.get(0));
+                if (thisLevel > highestLevel){
+                    highestLevel = thisLevel;
+                }
+            }
+        }
+        return highestLevel;
+    }
+
+    public void adjustQTMLevelSlider(Integer maxLevels){
+        this.aF.mainAppPanel.levelSlider.setMaximum(maxLevels);
+    }
+
     public InputStream pathToInputStream(String path) throws IOException {
         File initialFile = new File(path);
         InputStream targetStream = new FileInputStream(initialFile);
@@ -265,11 +282,14 @@ public class App {
         this.parseCSV(this.userCSVFilePath);
     }
 
-    public void receiveUserQTMLayersFolderPath(String aPath){
-//        System.out.println("received " + aPath);
-        this.userDataPathFormat = aPath;
+    public void receiveUserQTMLayersFolderPathAndFormat(String aPath, String aFormat){
+
+        this.userDataPathFormat = aPath + File.separator + aFormat;
         this.hasBinned = true;
-        this.attrToBin = "pop_max"; //TODO: I think this does nothing. Need to check, and remove the check for this in AppGeoJSONLoader in addRenderableForPolygon().
+        int levels = this.determineMaxQTMLevelFromLayerFiles(aPath);
+        this.maxQTMLevels = levels;
+        this.adjustQTMLevelSlider(this.maxQTMLevels);
+
         this.triggerRedraw();
     }
 
@@ -280,7 +300,6 @@ public class App {
         try {
             iS = pathToInputStream(filePath);
             csvParser = new LabeledCSVParser(new CSVParser(iS));
-//            System.out.println(csvParser.getAllValues());
             csvFieldNames = csvParser.getLabels();
         } catch (IOException e) {
             e.printStackTrace();
@@ -337,25 +356,11 @@ public class App {
 
     }
 
-    public void performBinning(){
-        // Here, we need to run a Python script to perform the geodetic
-        // binning, using a system call. Ideally that should be in a
-        // separate thread, to keep the app UI from being unresponsive.
-        // Needs to use the existing QTM level files, normal and lon-shifted
-        // versions, at all the levels of defined by the user with the
-        // combobox in the GUI. Those should be saved to a temporary
-        // location on the user's disk, to be selectable as layers to
-        // load onto the globe.
-        // TODO write me!
-
-    }
-
     public void bypassBinning(){
 
         // Use built in data. Hard-code some parameters for that data.
         this.plotCSVPoints();
         this.usingPreparedData = true;
-        this.attrToBin = "pop_max";
         this.hasBinned = true;
         this.triggerRedraw();
 
@@ -371,6 +376,8 @@ public class App {
         this.usingPreparedData = false;
         this.hasBinned = false;
         this.aF.mainAppPanel.resetAllBinningControls();
+        this.maxQTMLevels = 6;
+        this.aF.mainAppPanel.levelSlider.setMaximum(this.maxQTMLevels);
         this.quantileIndexesByBreakIndex.clear();
         this.triggerRedraw();
         this.currentFacetsDataValues.clear();
