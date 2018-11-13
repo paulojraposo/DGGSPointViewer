@@ -31,6 +31,9 @@ public class MarkerLayerMaker {
         markers = new ArrayList<Marker>();
         try {
             while (this.lCSVParser.getLine() != null) {
+
+                // TODO: Add choropleth quality to markers based on their statistic of interest. Essentially, drive the marker Material with that.
+
                 // We search the CSV data for these latitude and longitude fields specifically,
                 // so we require exactly those names, case-sensitive, and unique among the fields.
                 double lat = Double.valueOf(this.lCSVParser.getValueByLabel("latitude"));
@@ -40,10 +43,12 @@ public class MarkerLayerMaker {
                 LatLon ll = new LatLon(latAngle, lonAngle);
                 Marker marker = new BasicMarker(new Position(ll, 0.0), defaultMarkerAttributes);
                 BasicMarkerAttributes bmA = new BasicMarkerAttributes();
-                bmA.setMinMarkerSize(10000.0);
-                bmA.setMaxMarkerSize(35000.0);
+                // Markers scale with viewing height by default. Allowing them to be as small as 5 m, and big as 35km.
+                bmA.setMinMarkerSize(1.0);
+                bmA.setMaxMarkerSize(30000.0);
                 bmA.setMaterial(new Material(Color.YELLOW));
                 marker.setAttributes(bmA);
+                // marker.getAttributes().setOpacity(0.8);
                 markers.add(marker);
             }
         } catch (IOException e) {
@@ -55,9 +60,9 @@ public class MarkerLayerMaker {
 
         MarkerLayer layer = new MarkerLayer();
         layer.setKeepSeparated(false);
-        layer.setElevation(0.0);
         layer.setMarkers(markers);
-
+        layer.setElevation(0.0);
+        layer.setOverrideMarkerElevation(true); // So markers will show on top regardless of their individual elevations.
         return layer;
     }
 

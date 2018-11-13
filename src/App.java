@@ -15,10 +15,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static com.google.common.base.Splitter.onPattern;
 import static com.google.common.math.Quantiles.percentiles;
@@ -269,6 +266,12 @@ public class App {
 
     public void adjustQTMLevelSlider(Integer maxLevels){
         this.aF.mainAppPanel.levelSlider.setMaximum(maxLevels);
+        if (maxLevels > 14){
+            // Space out labels to every other tick if there are more than 14 - it gets crowded otherwise.
+            // With thanks to Pinkilla: https://stackoverflow.com/questions/13458076/howto-set-labels-match-major-ticks-with-jslider-in-java
+            // this.aF.mainAppPanel.levelSlider.setMajorTickSpacing(2);
+            this.aF.mainAppPanel.levelSlider.setLabelTable(this.aF.mainAppPanel.levelSlider.createStandardLabels(2));
+        }
     }
 
     public InputStream pathToInputStream(String path) throws IOException {
@@ -289,7 +292,6 @@ public class App {
         int levels = this.determineMaxQTMLevelFromLayerFiles(aPath);
         this.maxQTMLevels = levels;
         this.adjustQTMLevelSlider(this.maxQTMLevels);
-
         this.triggerRedraw();
     }
 
