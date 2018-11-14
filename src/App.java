@@ -63,7 +63,8 @@ public class App {
 
     public String currentColorRampChosen = orangesName;
 
-    public String aggregatedStatOfInterest = "Mean";
+    public ArrayList<String> statsAvailable = new ArrayList<String>();
+    public String aggregatedStatOfInterest;
 
     public ArrayList<Double> currentFacetsDataValues = new ArrayList<Double>();
 
@@ -82,6 +83,18 @@ public class App {
     }
 
     public void initialize() {
+
+        this.statsAvailable.add("PointCount");
+        this.statsAvailable.add("Sum");
+        this.statsAvailable.add("Mode");
+        this.statsAvailable.add("Median");
+        this.statsAvailable.add("Mean");
+        this.statsAvailable.add("StDev");
+        this.statsAvailable.add("Skew");
+        this.statsAvailable.add("Kurtosis");
+
+        this.aggregatedStatOfInterest = this.statsAvailable.get(4); // "Mean"
+
         this.mGUI = new MainGUI();
         this.aF = this.mGUI.start("Point Stats on a Discrete Global Grid", MainGUI.AppFrame.class);
         this.loadBlankGeoJSON();

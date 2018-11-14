@@ -11,6 +11,7 @@ import java.io.File;
 
 public class MainAppPanel extends JPanel{
 
+
     public JFileChooser fc;
 
     Border bGreyLine = BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1, true);
@@ -25,7 +26,6 @@ public class MainAppPanel extends JPanel{
     JLabel chooseFileLabel;
     JPanel dataLoadingButtonsPanel;
     JButton usePreparedDataButton;
-    String loadUserLayersButtonText = "Load data...";
     JButton loadUserLayersButton;
 
     // MAUP panel
@@ -38,6 +38,9 @@ public class MainAppPanel extends JPanel{
     // Classification and Mapping panel
     JPanel classingAndMappingPanel;
     JLabel colorLabel;
+    JLabel statOfInterestLabel;
+    JComboBox statOfInterestCB;
+    JPanel statOfInterestCBPanel;
     JLabel quantilesLabel;
     JSlider quantilesSlider;
     JLabel dummyLegendLabel;
@@ -67,17 +70,17 @@ public class MainAppPanel extends JPanel{
         logoPanel.add(logoLabel);
         this.add(logoPanel);
 
-        // Binning panel
+        // Data panel
         binningPanel = new JPanel();
-        bBinningTitled = BorderFactory.createTitledBorder(bGreyLine, "Data Input and Binning", TitledBorder.LEFT,  TitledBorder.TOP, null, Color.gray);
+        bBinningTitled = BorderFactory.createTitledBorder(bGreyLine, "Data Input", TitledBorder.LEFT,  TitledBorder.TOP, null, Color.gray);
         binningPanel.setBorder(bBinningTitled);
         binningPanel.setLayout(new GridLayout(0,2));
         chooseFileLabel = new JLabel("Input CSV:");
         binningPanel.add(chooseFileLabel);
         dataLoadingButtonsPanel = new JPanel();
-        FlowLayout dataLoadingButtonsPanellayout = (FlowLayout)dataLoadingButtonsPanel.getLayout();
-        dataLoadingButtonsPanellayout.setVgap(0);
-        dataLoadingButtonsPanellayout.setHgap(0);
+        FlowLayout dataLoadingButtonsPanelLayout = (FlowLayout) dataLoadingButtonsPanel.getLayout();
+        dataLoadingButtonsPanelLayout.setVgap(0);
+        dataLoadingButtonsPanelLayout.setHgap(0);
         usePreparedDataButton = new JButton("Use built-in");
         usePreparedDataButton.setToolTipText("Use included and prepared data: Natural Earth populated places throughout Africa.");
         usePreparedDataButton.addActionListener(new ActionListener() {
@@ -97,8 +100,7 @@ public class MainAppPanel extends JPanel{
             }
         });
         dataLoadingButtonsPanel.add(usePreparedDataButton);
-
-        loadUserLayersButton = new JButton(this.loadUserLayersButtonText);
+        loadUserLayersButton = new JButton("Load data");
         loadUserLayersButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -108,7 +110,6 @@ public class MainAppPanel extends JPanel{
         });
         dataLoadingButtonsPanel.add(loadUserLayersButton);
         binningPanel.add(dataLoadingButtonsPanel);
-
         this.add(binningPanel);
 
         // MAUP panel
@@ -145,12 +146,26 @@ public class MainAppPanel extends JPanel{
         maupPanel.add(EWTranslateSlider);
         this.add(maupPanel);
 
-        // Classing and Mapping Panel
+        // Visualization Panel
         classingAndMappingPanel = new JPanel();
         bClassificationTitled = BorderFactory.createTitledBorder(bGreyLine, "Visualization", TitledBorder.LEFT, TitledBorder.TOP, null, Color.black);
         classingAndMappingPanel.setBorder(bClassificationTitled);
-        GridLayout binningPanelLayout = new GridLayout(3,2);
+        GridLayout binningPanelLayout = new GridLayout(4,2);
         classingAndMappingPanel.setLayout(binningPanelLayout);
+        statOfInterestLabel = new JLabel("Aggregate statistic:");
+        statOfInterestCB = new JComboBox(Main.app.statsAvailable.toArray());
+        statOfInterestCB.setSelectedItem(Main.app.aggregatedStatOfInterest);
+        statOfInterestCB.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                Main.app.aggregatedStatOfInterest = (String) statOfInterestCB.getSelectedItem();
+                Main.app.triggerRedraw();
+            }
+        });
+        statOfInterestCBPanel = new JPanel();
+        statOfInterestCBPanel.add(statOfInterestCB);
+        classingAndMappingPanel.add(statOfInterestLabel);
+        classingAndMappingPanel.add(statOfInterestCBPanel);
         quantilesLabel = new JLabel("Quantiles:");
         classingAndMappingPanel.add(quantilesLabel);
         quantilesSlider = new JSlider(Main.app.minQuantiles, Main.app.maxQuantiles, Main.app.defaultQuantileCount);
@@ -165,7 +180,6 @@ public class MainAppPanel extends JPanel{
             }
         });
         classingAndMappingPanel.add(quantilesSlider);
-
         dummyLegendLabel = new JLabel("");
         classingAndMappingPanel.add(dummyLegendLabel);
         legendPanel = new AppLegend();
