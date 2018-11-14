@@ -166,6 +166,8 @@ public class UserLoadingPanel extends JPanel {
         // Checks whether csv file, folder, and column name values have all been given by the user.
         if (csvChosen == true & folderChosen == true){
             loadButton.setEnabled(true);
+            Color aGreen = new Color(97, 179, 41);
+            loadButton.setBackground(aGreen);
         }
     }
 }

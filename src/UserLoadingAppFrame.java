@@ -10,6 +10,7 @@ public class UserLoadingAppFrame extends JFrame {
         this.userLoadingPanel = new UserLoadingPanel();
         this.getContentPane().add(BorderLayout.CENTER, this.userLoadingPanel);
         this.pack();
+        this.setLocationRelativeTo(null);
         this.setVisible(true);
     }
 

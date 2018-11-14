@@ -1,6 +1,5 @@
 import com.Ostermiller.util.CSVParser;
 import com.Ostermiller.util.LabeledCSVParser;
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Splitter;
 import gov.nasa.worldwind.WorldWindow;
 import gov.nasa.worldwind.avlist.AVKey;
@@ -15,9 +14,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 
-import static com.google.common.base.Splitter.onPattern;
 import static com.google.common.math.Quantiles.percentiles;
 
 public class App {
@@ -266,7 +268,8 @@ public class App {
         int highestLevel = 0;
         Splitter spl =  Splitter.onPattern("[a-zA-Z]+").omitEmptyStrings(); // regex for any number of contiguous alphabet characters.
         for(File f: listOfFiles){
-            if (f.isFile()) {
+            // Only proceed on GeoJSON files, identified by their file extension.
+            if (f.isFile() && this.getFileTypeLowerCase(f).equals("geojson")) {
                 List<String> l = spl.splitToList(f.getName());
                 int thisLevel = Integer.parseInt(l.get(0));
                 if (thisLevel > highestLevel){
@@ -275,6 +278,13 @@ public class App {
             }
         }
         return highestLevel;
+    }
+
+    public String getFileTypeLowerCase(File f){
+        // Uses Guava to simply get the extension of a given file, as a lower-case String.
+        // Using the fully qualified name for this Guava module because we import Java's
+        // native Files class and use it elsewhere in here.
+        return com.google.common.io.Files.getFileExtension(f.getAbsolutePath().toLowerCase());
     }
 
     public void adjustQTMLevelSlider(Integer maxLevels){
