@@ -12,6 +12,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 public class MainAppPanel extends JPanel{
 
@@ -23,7 +25,7 @@ public class MainAppPanel extends JPanel{
     Border bMAUPTitled;
     Border bClassificationTitled;
     JPanel logoPanel;
-    JLabel logoLabel;
+    JButton logoButton;
 
     // Binning panel
     JPanel binningPanel;
@@ -66,20 +68,33 @@ public class MainAppPanel extends JPanel{
         this.setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
         this.setBorder(new CompoundBorder(BorderFactory.createEmptyBorder(3, 3, 3, 3), new TitledBorder("")));
 
-        // UT Logo
+        // UT Logo, in a button, that, when pressed, takes the user to my UT Geography webpage.
         logoPanel = new JPanel();
-        logoLabel = new JLabel();
+        logoButton = new JButton();
         InputStream logoIS = this.getClass().getResourceAsStream("resources/UTGeog.png");
         BufferedImage utIcon = null;
         try {
             utIcon = ImageIO.read(logoIS);
             ImageIcon ii = new ImageIcon(utIcon);
-            logoLabel.setIcon(ii);
-            logoLabel.setVisible(true);
+            logoButton.setIcon(ii);
+            logoButton.setVisible(true);
+            logoButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    URI uri = null;
+                    try {
+                        uri = new URI("http://geography.utk.edu/about-us/faculty/dr-paulo-raposo/");
+                    } catch (URISyntaxException e1) {
+                        e1.printStackTrace();
+                    }
+                    Main.app.openURI(uri);
+                }
+            });
+            logoButton.setFocusable(false);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        logoPanel.add(logoLabel);
+        logoPanel.add(logoButton);
         this.add(logoPanel);
 
         // Data panel

@@ -10,10 +10,12 @@ import gov.nasa.worldwind.layers.LayerList;
 import gov.nasa.worldwind.util.Logging;
 
 import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -309,7 +311,6 @@ public class App {
     }
 
     public void receiveUserQTMLayersFolderPathAndFormat(String aPath, String aFormat){
-
         this.userDataPathFormat = aPath + File.separator + aFormat;
         this.hasBinned = true;
         int levels = this.determineMaxQTMLevelFromLayerFiles(aPath);
@@ -378,7 +379,6 @@ public class App {
             System.out.println(e.getMessage());
             System.out.println("Failed to rotate globe to center of user CSV :(");
         }
-
     }
 
     public void bypassBinning(){
@@ -406,6 +406,17 @@ public class App {
         this.quantileIndexesByBreakIndex.clear();
         this.triggerRedraw();
         this.currentFacetsDataValues.clear();
+    }
+
+    // With thanks to McDowell on stackoverflow: https://stackoverflow.com/questions/527719/how-to-add-hyperlink-in-jlabel
+    public static void openURI(URI uri) {
+        if (Desktop.isDesktopSupported()) {
+            try {
+                Desktop.getDesktop().browse(uri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
