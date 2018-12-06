@@ -1,3 +1,4 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
@@ -7,7 +8,10 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class MainAppPanel extends JPanel{
 
@@ -65,8 +69,16 @@ public class MainAppPanel extends JPanel{
         // UT Logo
         logoPanel = new JPanel();
         logoLabel = new JLabel();
-        logoLabel.setIcon(new ImageIcon("out/resources/UTGeog.png"));
-        logoLabel.setVisible(true);
+        InputStream logoIS = this.getClass().getResourceAsStream("resources/UTGeog.png");
+        BufferedImage utIcon = null;
+        try {
+            utIcon = ImageIO.read(logoIS);
+            ImageIcon ii = new ImageIcon(utIcon);
+            logoLabel.setIcon(ii);
+            logoLabel.setVisible(true);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         logoPanel.add(logoLabel);
         this.add(logoPanel);
 
