@@ -4,6 +4,6 @@ A Java application that illustrates the [Modifiable Areal Unit Problem (MAUP)](h
 
 ![screenshot](figures/webappscreenshot.png)
 
-This software accompanies the following forthcoming academic paper:
+This software accompanies the following academic paper:
 
-Raposo, P., Robinson, A., & Brown, R. (2019). A Virtual Globe Using a Discrete Global Grid System to Illustrate the Modifiable Areal Unit Problem. *Cartographica*, 54(1).
+Raposo, P., Robinson, A., & Brown, R. (2019). A Virtual Globe Using a Discrete Global Grid System to Illustrate the Modifiable Areal Unit Problem. *Cartographica*, 54(1), 51-62.
